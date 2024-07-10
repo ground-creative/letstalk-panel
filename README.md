@@ -39,3 +39,5 @@ gunicorn -w 4 -b 0.0.0.0:5002 app:app
 ```
 serve -s frontend -l 3006
 ```
+
+3. Access panel at http://localhost:5002
