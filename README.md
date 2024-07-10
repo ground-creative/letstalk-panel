@@ -6,7 +6,7 @@ A web panel to test combined AI resources.
 
 ### Docker
 
-Follow instructions here to install with docker
+Follow instructions here to install with docker<br />
 https://github.com/ground-creative/openvoice-docker
 
 ### Stand Alone Installation
