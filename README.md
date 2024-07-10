@@ -11,8 +11,6 @@ https://github.com/ground-creative/openvoice-docker
 
 ### Stand Alone Installation
 
-You are going to need to include OpenVoice dependencies manually.
-
 1. Clone the repository
 
 ```
@@ -20,6 +18,13 @@ git clone https://github.com/ground-creative/letstalk-panel.git
 ```
 
 2. Change environment variables in env.sample file and rename it to .env
+
+3. Install dependencies
+
+```
+cd backend
+pip install -r requirements.txt
+```
 
 ## Usage
 
