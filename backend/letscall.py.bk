@@ -1,0 +1,111 @@
+from flask import Flask, request, Response, send_file, session
+from twilio.twiml.voice_response import VoiceResponse, Gather
+from twilio.rest import Client
+from gtts import gTTS
+import os, urllib
+from modules.tools import Tools
+
+app = Flask(__name__)
+
+# Your Twilio credentials
+account_sid = ''
+auth_token = ''
+twilio_number = ''
+ngrok_url = ''
+universal_ai_api_url = 'http://localhost:5000'
+client = Client(account_sid, auth_token)
+max_conversation_history = 10
+speech_voice = 'onyx'
+app.secret_key = 'your_secret_key'
+
+@app.route("/voice", methods=['GET', 'POST'])
+def voice():
+    print("Received request at /voice endpoint.")
+    system_message = request.args.get('system_message', '')
+    start_conversation = int(request.args.get('start_conversation', '0'))
+    print(f"Received parameters: system_message={system_message}")
+
+    if start_conversation:
+        print("Conversation Started")
+        session['conversation_history'] = []
+        conversation_history = [
+            {"role": "system", "content": system_message}
+        ]
+        session['conversation_history'] = conversation_history
+
+    print(session)
+
+
+    response = VoiceResponse()
+    gather = Gather(input='speech', action='/process_speech', speechTimeout='auto')
+    response.append(gather)
+    return str(response)
+
+@app.route("/process_speech", methods=['POST'])
+async def process_speech():
+
+    conversation_history = session.get('conversation_history', [])
+
+    try:
+        print("Received request at /process_speech endpoint.")
+        transcription_text = request.form.get('SpeechResult', 'No speech detected')
+        print(f"Transcription: {transcription_text}")
+
+        if transcription_text.strip().lower() == 'no speech detected':
+            print("No speech detected.")
+            response = VoiceResponse()
+            response.say("Can you please repeat that.")
+            response.redirect('/voice')
+            return str(response)
+
+       
+        completion, session['conversation_history'] = await Tools.send_chat(universal_ai_api_url, conversation_history, transcription_text, max_conversation_history)
+
+        print(session['conversation_history'])
+
+        if completion:
+            response_audio = await Tools.get_text_to_speech(universal_ai_api_url, completion, speech_voice)
+            if response_audio:
+                output_file = Tools.generate_random_filename('audio_files/', 'mp3')
+                Tools.write_audio_file(output_file, response_audio)
+                           
+
+                # Prepare TwiML response to play the audio file
+                response = VoiceResponse()
+                #response.say("ok I understand")
+                response.play(f"{ngrok_url}/play_audio?file={output_file}")
+                response.redirect('/voice')  # Redirect to /voice to continue the conversation
+                return str(response)
+        
+        return Response()
+
+    
+    
+    except Exception as e:
+        print(f"An error occurred: {e}")
+        response = VoiceResponse()
+        response.say("An error occurred. Please try again.")
+        response.redirect('/voice')
+        return str(response)
+    
+@app.route('/play_audio')
+def play_audio():
+    #file_path = os.path.join('audio_files/', request.args.get('file'))
+    file_path = request.args.get('file')
+    return send_file(file_path, mimetype='audio/mpeg')
+
+@app.route("/make_call", methods=['POST'])
+def make_call():
+    system_message = request.form.get('system_message', 'Nothing')
+    encoded_system_message = urllib.parse.quote(system_message)
+    to_number = request.form['to']
+    call = client.calls.create(
+        #twiml='<Response><Say>Ahoy, World!</Say></Response>',
+        url=f"{ngrok_url}/voice?start_conversation=1&system_message={encoded_system_message}",
+        to=to_number,
+        from_=twilio_number
+    )
+    return f"Call initiated: {call.sid}"
+
+if __name__ == "__main__":
+    app.run(debug=True, port=5001) 
