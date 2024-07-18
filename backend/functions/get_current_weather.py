@@ -5,7 +5,7 @@ def get_current_weather(location, unit={"fahrenheit"}):
     """Get the current weather in a given location"""
 
     units = "imperial" if unit == "fahrenheit" else "metric"
-    api_key = "f0207a797d9807aa7ca42273a33306fb"
+    api_key = ""
     url = f"http://api.openweathermap.org/data/2.5/weather?q={location}&appid={api_key}&units={units}"
     res = requests.get(url)
 
