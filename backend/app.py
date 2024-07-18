@@ -222,6 +222,7 @@ def chat(engine):
             return OpenAiClient.completion(
                 message, conversation_history, max_conversation_history, create_args
             )
+
         elif engine == "ollama":
             return OpenAiClient.completion(
                 message,
@@ -230,6 +231,7 @@ def chat(engine):
                 create_args,
                 f"{OLLAMA_API_URL}/v1",
             )
+
         elif engine == "lmstudio":
             return OpenAiClient.completion(
                 message,
@@ -238,6 +240,7 @@ def chat(engine):
                 create_args,
                 f"{LMSTUDIO_API_URL}/v1",
             )
+
         else:
             payload_response = ApiResponse.payload(
                 False, 400, f"Completion engine {engine} not supported"
