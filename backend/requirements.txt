@@ -9,4 +9,6 @@ Werkzeug==3.0.3
 gunicorn==22.0.0
 pydub==0.25.1
 python-magic==0.4.27
+flask_socketio==5.3.6
+twilio==9.2.3
 git+https://github.com/ground-creative/openvoice-api-client-python.git

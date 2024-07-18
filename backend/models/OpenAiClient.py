@@ -77,7 +77,7 @@ class OpenAiClient:
             content = response.choices[0].message.content
 
         except OpenAIError as e:
-            OpenAiClient.logger.error(f"Error getting STT: {str(e)}")
+            OpenAiClient.logger.error(f"Error getting completion: {str(e)}")
 
             if OpenAiClient.logLevel == "DEBUG":
                 OpenAiClient.logger.error(traceback.format_exc())
@@ -87,6 +87,11 @@ class OpenAiClient:
             return ApiResponse.output(payload_response, status_code)
 
         except Exception as e:
+            OpenAiClient.logger.error(f"Error getting completion: {str(e)}")
+
+            if OpenAiClient.logLevel == "DEBUG":
+                OpenAiClient.logger.error(traceback.format_exc())
+
             payload_response = ApiResponse.payload(False, 500, "Internal server error")
             return ApiResponse.output(payload_response, 500)
 
