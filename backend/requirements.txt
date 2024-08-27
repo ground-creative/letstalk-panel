@@ -3,7 +3,6 @@ colorlog==6.8.2
 elevenlabs==1.7.0
 Flask==3.0.3
 Flask_Cors==4.0.1
-Flask_SocketIO==5.3.6
 flask_sqlalchemy==3.1.1
 marshmallow_dataclass==8.7.0
 openai==1.41.1

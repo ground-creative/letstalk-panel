@@ -1,3 +1,5 @@
+from config.env import EnvConfig
+
 services = {
     "docs": {
         "path": "blueprints.docs.routes",
@@ -8,28 +10,23 @@ services = {
         "workspaces": {
             "path": "blueprints.backend.workspaces.routes",
             "blueprint_name": "backend_workspaces_bp",
-            "kwargs": {"url_prefix": "/backend/workspaces"},
+            "kwargs": {"url_prefix": f"{EnvConfig.BACKEND_PREFIX}/workspaces"},
         },
         "api_keys": {
             "path": "blueprints.backend.api_keys.routes",
             "blueprint_name": "backend_api_keys_bp",
-            "kwargs": {"url_prefix": "/backend/workspaces"},
+            "kwargs": {"url_prefix": f"{EnvConfig.BACKEND_PREFIX}/workspaces"},
         },
         "assistants": {
             "path": "blueprints.backend.assistants.routes",
             "blueprint_name": "backend_assistants_bp",
-            "kwargs": {"url_prefix": "/backend/workspaces"},
+            "kwargs": {"url_prefix": f"{EnvConfig.BACKEND_PREFIX}/workspaces"},
         },
         # "providers": {
         #    "path": "blueprints.backend.providers.routes",
         #    "blueprint_name": "backend_providers_bp",
         #    "kwargs": {"url_prefix": "/backend/providers"},
         # },
-    },
-    "frontend": {
-        "path": "blueprints.frontend.routes",
-        "blueprint_name": "frontend_bp",
-        "kwargs": {"url_prefix": "/panel"},
     },
     "api": {
         "v1": {
@@ -44,3 +41,11 @@ services = {
         },
     },
 }
+
+# Conditionally add "frontend" services
+if EnvConfig.WEB_PANEL_ADDRESS:
+    services["frontend"] = {
+        "path": "blueprints.frontend.routes",
+        "blueprint_name": "frontend_bp",
+        "kwargs": {"url_prefix": f"{EnvConfig.WEB_PANEL_PREFIX}"},
+    }

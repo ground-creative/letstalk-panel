@@ -1,7 +1,7 @@
 import colorlog, time, warnings
 from flask import request, redirect, render_template, abort, g, send_file
 from flask_cors import CORS
-from flask_socketio import SocketIO
+from flask.cli import with_appcontext
 from apiflask import APIFlask
 from models.Response import Response as ApiResponse
 from models.OpenAiClient import OpenAiClient
@@ -15,7 +15,6 @@ from decorators.UserAuth import validate_token
 from utils.blueprints import register_blueprints
 from utils.get_config import get_config
 from db.db import db
-from flask.cli import with_appcontext
 from utils.get_models import import_models
 
 if EnvConfig.DEBUG_APP:
@@ -26,9 +25,6 @@ else:
     warnings.filterwarnings("ignore", category=UserWarning, module="pydantic")
 
 imported_models = import_models(ModelsConfig)
-
-
-socketio = SocketIO()
 
 
 def create_app():
@@ -43,7 +39,6 @@ def create_app():
 
     # Initialize extensions with the app
     db.init_app(app)
-    socketio.init_app(app)
     CORS(app)
 
     # Configure logging
@@ -90,12 +85,23 @@ def create_app():
         return update_spec(spec)
 
     # Add webpanel redirect if needed
-    if app.config.get("WEB_PANEL_ADDRESS") and app.config.get("WEB_PANEL_PREFIX"):
+    if app.config.get("WEB_PANEL_ADDRESS"):
 
-        @app.route("/", methods=["GET"])
-        @app.route("/panel/", methods=["GET"])
-        def handle_redirect_to_panel():
-            return redirect(app.config.get("WEB_PANEL_PREFIX"), code=302)
+        if (
+            app.config.get("WEB_PANEL_PREFIX")
+            and app.config.get("WEB_PANEL_PREFIX") != "/"
+        ):
+
+            @app.route("/", methods=["GET"])
+            @app.route(f"/{app.config.get('WEB_PANEL_PREFIX')}/", methods=["GET"])
+            def handle_redirect_to_panel():
+                query_params = request.query_string.decode("utf-8")
+                target_url = app.config.get("WEB_PANEL_PREFIX")
+
+                if query_params:
+                    target_url += "?" + query_params
+
+                return redirect(target_url, code=302)
 
     @app.before_request
     def log_request_info():
@@ -182,8 +188,7 @@ def create_app():
 
 if __name__ == "__main__":
     app = create_app()
-    socketio.run(
-        app,
+    app.run(
         host=app.config.get("SERVER_ADDRESS"),
         port=app.config.get("SERVER_PORT"),
         debug=app.config.get("DEBUG_APP"),

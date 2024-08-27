@@ -7,9 +7,7 @@ frontend_bp = Blueprint("frontend_blueprint", __name__)
 @frontend_bp.route("", methods=["GET", "POST"])
 def proxy_to_panel_url():
 
-    base_url = (
-        f"{app.config.get('WEB_PANEL_ADDRESS')}{app.config.get('WEB_PANEL_PREFIX')}"
-    )
+    base_url = f"{app.config.get('WEB_PANEL_ADDRESS')}:{app.config.get('WEB_PANEL_PORT')}{app.config.get('WEB_PANEL_PREFIX')}"
     proxy_url = f"{base_url}"
     response = requests.get(proxy_url)
 
@@ -29,9 +27,7 @@ def proxy_to_panel_url_paths(subpath):
     # if request.path.startswith("/api/"):
     #    return jsonify({"error": "API endpoint not found"}), 404
 
-    base_url = (
-        f"{app.config.get('WEB_PANEL_ADDRESS')}{app.config.get('WEB_PANEL_PREFIX')}"
-    )
+    base_url = f"{app.config.get('WEB_PANEL_ADDRESS')}:{app.config.get('WEB_PANEL_PORT')}{app.config.get('WEB_PANEL_PREFIX')}"
     proxy_url = f"{base_url}/{subpath}"
     response = requests.get(proxy_url)
 
@@ -51,9 +47,7 @@ def proxy_to_panel_url_static(path, subpath):
     # if request.path.startswith("/api/"):
     #    return jsonify({"error": "API endpoint not found"}), 404
 
-    base_url = (
-        f"{app.config.get('WEB_PANEL_ADDRESS')}{app.config.get('WEB_PANEL_PREFIX')}"
-    )
+    base_url = f"{app.config.get('WEB_PANEL_ADDRESS')}:{app.config.get('WEB_PANEL_PORT')}{app.config.get('WEB_PANEL_PREFIX')}"
     proxy_url = f"{base_url}/static/{path}/{subpath}"
     response = requests.get(proxy_url)
 
