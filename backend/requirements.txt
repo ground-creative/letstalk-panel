@@ -16,3 +16,4 @@ SQLAlchemy==2.0.32
 twilio==9.2.3
 Werkzeug==3.0.3
 mysql-connector-python==9.0.0
+gunicorn==22.0.0
