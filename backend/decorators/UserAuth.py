@@ -49,16 +49,14 @@ def get_token_cookie():
 def validate_token(token):
     """Validates the Access Token and sets g.jwt_payload."""
     try:
-        # Load the JWKS (JSON Web Key Set)
         jsonurl = urlopen(
             "https://" + app.config.get("AUTH0_DOMAIN") + "/.well-known/jwks.json"
         )
         jwks = json.loads(jsonurl.read())
-
-        # Decode the token header
         unverified_header = jwt.get_unverified_header(token)
         rsa_key = {}
         for key in jwks["keys"]:
+
             if key["kid"] == unverified_header["kid"]:
                 rsa_key = {
                     "kty": key["kty"],
@@ -79,7 +77,10 @@ def validate_token(token):
                     issuer="https://" + app.config.get("AUTH0_DOMAIN") + "/",
                 )
                 g.jwt_payload = payload
-                print(payload)
+
+                if app.config.get("DEBUG_APP"):
+                    app.logger.debug("JWT payload: %s", payload)
+
                 return None  # Indicate success
             except jwt.ExpiredSignatureError:
                 return ApiResponse.output(

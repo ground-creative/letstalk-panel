@@ -6,6 +6,7 @@ load_dotenv()
 
 class EnvConfig:
     LOG_LEVEL = os.getenv("LOG_LEVEL", "DEBUG")
+    DEBUG_APP = os.getenv("DEBUG_APP", 1)
     SERVER_ADDRESS = os.getenv("SERVER_ADDRESS", "0.0.0.0")
     SERVER_PORT = os.getenv("SERVER_PORT", 5000)
     OPENVOICE_API_URL = os.getenv("OPENVOICE_API_URL", "http://127.0.0.1:5001")

@@ -1,23 +1,12 @@
+import json, warnings
 from db.db import db
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.inspection import inspect
-import json
 from typing import Union, List, Optional
 
 
 class BaseModel(db.Model):
     __abstract__ = True  # Indicates this is a base class, not a table
-
-    @staticmethod
-    def _generate_filter(query, filters, model_class):
-        for column, value in filters.items():
-            if hasattr(model_class, column):
-                query = query.filter(getattr(model_class, column) == value)
-            else:
-                raise AttributeError(
-                    f"Column {column} does not exist in model {model_class.__name__}"
-                )
-        return query
 
     @classmethod
     def get(
@@ -116,6 +105,17 @@ class BaseModel(db.Model):
         ]
         # return cls._model_to_dict(model_instances) if model_instances is not None else {}
 
+    @classmethod
+    def toDict(
+        cls, model_instances: Union["BaseModel", List["BaseModel"]]
+    ) -> Union[dict, List[dict]]:
+        warnings.warn(
+            "The method 'toDict' is deprecated. Please use 'to_dict' instead.",
+            DeprecationWarning,
+            stacklevel=2,
+        )
+        return cls.to_dict(model_instances)
+
     @staticmethod
     def _model_to_dict(model_instance) -> dict:
         """Convert a SQLAlchemy model instance to a dictionary."""
@@ -125,3 +125,14 @@ class BaseModel(db.Model):
             column.name: getattr(model_instance, column.name)
             for column in inspect(model_instance.__class__).columns
         }
+
+    @staticmethod
+    def _generate_filter(query, filters, model_class):
+        for column, value in filters.items():
+            if hasattr(model_class, column):
+                query = query.filter(getattr(model_class, column) == value)
+            else:
+                raise AttributeError(
+                    f"Column {column} does not exist in model {model_class.__name__}"
+                )
+        return query

@@ -7,8 +7,8 @@ from models.Response import Response as ApiResponse
 from models.OpenAiClient import OpenAiClient
 from config.env import EnvConfig
 from config.docs import DocsConfig
-from config.models import ModelsConfig
 from config.security import SecurityConfig
+from config.models import ModelsConfig
 from config.services import services
 from utils.spec import update_spec
 from decorators.UserAuth import validate_token
@@ -18,8 +18,12 @@ from db.db import db
 from flask.cli import with_appcontext
 from utils.get_models import import_models
 
-# Filter pydantic warnings
-warnings.filterwarnings("ignore", category=UserWarning, module="pydantic")
+if EnvConfig.DEBUG_APP:
+    # Add deprecations warnings
+    warnings.simplefilter("default", DeprecationWarning)
+else:
+    # Filter pydantic warnings
+    warnings.filterwarnings("ignore", category=UserWarning, module="pydantic")
 
 imported_models = import_models(ModelsConfig)
 
@@ -85,27 +89,48 @@ def create_app():
     def update_spec_handler(spec):
         return update_spec(spec)
 
-    if app.config.get("WEB_PANEL_ADDRESS"):
+    # Add webpanel redirect if needed
+    if app.config.get("WEB_PANEL_ADDRESS") and app.config.get("WEB_PANEL_PREFIX"):
 
         @app.route("/", methods=["GET"])
+        @app.route("/panel/", methods=["GET"])
         def handle_redirect_to_panel():
-            return redirect("/panel", code=302)
+            return redirect(app.config.get("WEB_PANEL_PREFIX"), code=302)
 
     @app.before_request
     def log_request_info():
         app.logger.info(
             f"Started processing {request.method} request from {request.remote_addr} => {request.url}"
         )
+
+        # Redirect deprecated routes
+        if request.path.startswith("/api") and not any(
+            request.path.startswith(f"/api/v{v}") for v in range(1, 10)
+        ):
+            new_path = "/api/v1" + request.path[len("/api") :]
+            query_string = request.query_string.decode("utf-8")
+
+            if query_string:
+                new_path += "?" + query_string
+
+            app.logger.warning(f"Redirecting deprecated {request.path} to {new_path}")
+
+            return redirect(new_path, code=307)
+
+        # Protect json docs
         if request.path == "/docs/openapi-backend.json":
             accessToken = request.cookies.get("accessToken", None)
             is_invalid = validate_token(accessToken)
+
             if is_invalid:
                 abort(401)
+
             if (
                 "is_superadmin" not in g.jwt_payload
                 or not g.jwt_payload["is_superadmin"]
             ):
                 abort(401)
+
         request.start_time = time.time()
 
     @app.after_request
@@ -133,13 +158,13 @@ def create_app():
     # Handle 404 errors
     @app.errorhandler(404)
     def page_not_found(error):
-        if request.path.startswith("/api/") or request.path.startswith("/backend"):
+        if request.path.startswith("/api") or request.path.startswith("/backend"):
             msg = f" > No service is associated with the url => {request.method}:{request.url}"
             app.logger.error(msg)
-            if request.path.startswith("/api/v2"):
-                payload_response = ApiResponse.not_found_v2(msg, {})
-            else:
+            if request.path.startswith("/api/v1"):
                 payload_response = ApiResponse.not_found(msg, {})
+            else:
+                payload_response = ApiResponse.not_found_v2(msg, {})
             return ApiResponse.output(payload_response, 404)
         else:
             return render_template("404.html"), 404
@@ -161,5 +186,5 @@ if __name__ == "__main__":
         app,
         host=app.config.get("SERVER_ADDRESS"),
         port=app.config.get("SERVER_PORT"),
-        debug=True,
+        debug=app.config.get("DEBUG_APP"),
     )

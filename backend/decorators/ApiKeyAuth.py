@@ -1,4 +1,4 @@
-from flask import Response, request, g
+from flask import Response, request, g, current_app as app
 from functools import wraps
 from models.Response import Response as ApiResponse
 from blueprints.backend.models.ApiKeys import ApiKeyModel
@@ -18,6 +18,8 @@ def validate_api_key(api_key):
     records = ApiKeyModel.get({"api_key": api_key, "type": "private"})
     if len(records) > 0:
         g.api_key = records[0]
+        if app.config.get("DEBUG_APP"):
+            app.logger.debug("API Key: %s", g.api_key)
         return None
     payload_response = ApiResponse.payload_v2(401, "API Key not found")
     return ApiResponse.output(payload_response)
