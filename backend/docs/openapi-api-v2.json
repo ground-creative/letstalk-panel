@@ -1,0 +1,540 @@
+{
+  "info": {
+    "title": "Let's Talk API Docs",
+    "version": "2.0",
+    "description": "API for building assistants"
+  },
+  "tags": [
+    {
+      "name": "Assistants"
+    }
+  ],
+  "servers": [
+    {
+      "url": "http://localhost:5002/"
+    }
+  ],
+  "paths": {
+    "/api/v2/assistants/chat": {
+      "get": {
+        "parameters": [],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "code": {
+                      "type": "integer"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "time": {
+                      "type": "integer"
+                    },
+                    "data": {
+                      "type": "object"
+                    }
+                  }
+                }
+              }
+            },
+            "description": "Successful response"
+          }
+        },
+        "tags": [
+          "Chat Assistants"
+        ],
+        "summary": "Get Chat Assistants",
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ]
+      },
+      "post": {
+        "parameters": [],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "code": {
+                      "type": "integer"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "time": {
+                      "type": "integer"
+                    },
+                    "data": {
+                      "type": "object"
+                    }
+                  }
+                }
+              }
+            },
+            "description": "Successful response"
+          }
+        },
+        "tags": [
+          "Chat Assistants"
+        ],
+        "summary": "Create Chat Assistant",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ChatAssistantCreate"
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ]
+      }
+    },
+    "/api/v2/assistants/chat/{assistantID}": {
+      "get": {
+        "parameters": [
+          {
+            "in": "path",
+            "name": "assistantID",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "code": {
+                      "type": "integer"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "time": {
+                      "type": "integer"
+                    },
+                    "data": {
+                      "type": "object"
+                    }
+                  }
+                }
+              }
+            },
+            "description": "Successful response"
+          }
+        },
+        "tags": [
+          "Chat Assistants"
+        ],
+        "summary": "Get Chat Assistant",
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ]
+      },
+      "patch": {
+        "parameters": [
+          {
+            "in": "path",
+            "name": "assistantID",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "code": {
+                      "type": "integer"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "time": {
+                      "type": "integer"
+                    },
+                    "data": {
+                      "type": "object"
+                    }
+                  }
+                }
+              }
+            },
+            "description": "Successful response"
+          }
+        },
+        "tags": [
+          "Chat Assistants"
+        ],
+        "summary": "Update Chat Assistant",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ChatAssistantCreate"
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ]
+      },
+      "delete": {
+        "parameters": [
+          {
+            "in": "path",
+            "name": "assistantID",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "code": {
+                      "type": "integer"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "time": {
+                      "type": "integer"
+                    },
+                    "data": {
+                      "type": "object"
+                    }
+                  }
+                }
+              }
+            },
+            "description": "Successful response"
+          }
+        },
+        "tags": [
+          "Chat Assistants"
+        ],
+        "summary": "Delete Chat Assistant",
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ]
+      }
+    }
+  },
+  "openapi": "3.0.3",
+  "components": {
+    "schemas": {
+      "ChatAssistantResponse": {
+        "type": "object",
+        "properties": {
+          "sid": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "model": {
+            "type": "string"
+          },
+          "provider_sid": {
+            "type": "string"
+          },
+          "workspace_sid": {
+            "type": "string"
+          },
+          "temperature": {
+            "type": "number"
+          },
+          "knowledge_base": {
+            "type": "string"
+          },
+          "tools": {
+            "type": "object"
+          },
+          "extra_params": {
+            "type": "object"
+          },
+          "created": {
+            "type": "string",
+            "format": null,
+            "pattern": null
+          },
+          "updated": {
+            "type": "string",
+            "format": null,
+            "pattern": null
+          }
+        },
+        "required": [
+          "created",
+          "extra_params",
+          "knowledge_base",
+          "model",
+          "name",
+          "provider_sid",
+          "sid",
+          "temperature",
+          "tools",
+          "updated",
+          "workspace_sid"
+        ]
+      },
+      "ChatAssistantCreate": {
+        "type": "object",
+        "properties": {
+          "provider": {
+            "type": "string",
+            "description": "Provider ID"
+          },
+          "name": {
+            "type": "string",
+            "minLength": 5,
+            "maxLength": 30
+          },
+          "system_prompt": {
+            "type": "string"
+          },
+          "model": {
+            "type": "string"
+          },
+          "temperature": {
+            "type": "number",
+            "minimum": 0.0,
+            "maximum": 1.0
+          },
+          "tools": {
+            "type": "object",
+            "default": {},
+            "additionalProperties": {
+              "nullable": true
+            }
+          },
+          "knowledge_base": {
+            "type": "string",
+            "default": ""
+          },
+          "extra_params": {
+            "type": "object",
+            "default": {},
+            "additionalProperties": {
+              "nullable": true
+            }
+          }
+        },
+        "required": [
+          "model",
+          "name",
+          "provider",
+          "system_prompt",
+          "temperature"
+        ]
+      },
+      "ApiKeyResponse": {
+        "type": "object",
+        "properties": {
+          "sid": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string"
+          },
+          "api_key": {
+            "type": "string"
+          },
+          "workspace_sid": {
+            "type": "string"
+          },
+          "created": {
+            "type": "string",
+            "format": null,
+            "pattern": null
+          },
+          "updated": {
+            "type": "string",
+            "format": null,
+            "pattern": null
+          }
+        },
+        "required": [
+          "api_key",
+          "created",
+          "name",
+          "sid",
+          "type",
+          "updated",
+          "workspace_sid"
+        ]
+      },
+      "ApiKeyCreate": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "minLength": 5,
+            "maxLength": 30
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "public",
+              "private"
+            ]
+          }
+        },
+        "required": [
+          "name",
+          "type"
+        ]
+      },
+      "ProviderResponse": {
+        "type": "object",
+        "properties": {
+          "sid": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "source": {
+            "type": "string"
+          },
+          "address": {
+            "type": "string"
+          },
+          "api_key": {
+            "type": "string"
+          },
+          "workspace_sid": {
+            "type": "string"
+          },
+          "default_config": {
+            "type": "object"
+          },
+          "created": {
+            "type": "string",
+            "format": null,
+            "pattern": null
+          },
+          "updated": {
+            "type": "string",
+            "format": null,
+            "pattern": null
+          }
+        },
+        "required": [
+          "address",
+          "api_key",
+          "created",
+          "default_config",
+          "name",
+          "sid",
+          "source",
+          "type",
+          "updated",
+          "workspace_sid"
+        ]
+      },
+      "ProviderCreate": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "minLength": 5,
+            "maxLength": 30
+          },
+          "api_key": {
+            "type": "string"
+          },
+          "address": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "transcriber",
+              "model",
+              "voice"
+            ]
+          },
+          "source": {
+            "type": "string"
+          },
+          "default_config": {
+            "type": "object",
+            "default": {},
+            "additionalProperties": {
+              "nullable": true
+            }
+          }
+        },
+        "required": [
+          "address",
+          "api_key",
+          "name",
+          "source",
+          "type"
+        ]
+      },
+      "ApiKeyEdit": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "minLength": 5,
+            "maxLength": 30
+          }
+        },
+        "required": [
+          "name"
+        ]
+      }
+    },
+    "securitySchemes": {
+      "ApiKeyAuth": {
+        "type": "apiKey",
+        "in": "header",
+        "name": "X-API-Key"
+      }
+    }
+  }
+}

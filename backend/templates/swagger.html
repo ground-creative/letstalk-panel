@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <title>{{ config.DOCS_TITLE }}</title>
+  <link rel="stylesheet" type="text/css" href="{{ config.SWAGGER_UI_CSS }}">
+  <link rel="icon" type="image/png" href="{{ config.DOCS_FAVICON }}">
+  <style>
+    html {
+      box-sizing: border-box;
+      overflow: -moz-scrollbars-vertical;
+      overflow-y: scroll;
+    }
+
+    *,
+    *:before,
+    *:after {
+      box-sizing: inherit;
+    }
+
+    body {
+      margin: 0;
+      background: #fafafa;
+    }
+
+    /* Updated CSS */
+    .topbar {
+        background-color: #000; /* Black background */
+        padding: 10px 20px;
+        display: flex;
+        align-items: center;
+        justify-content: center; /* Center the content horizontally */
+        width: 100%;
+        box-sizing: border-box;
+    }
+
+    .topbar-content {
+        display: flex;
+        align-items: center;
+        justify-content: space-between; /* Space out items within the container */
+        box-sizing: border-box;
+        margin: 0 auto;
+        max-width: 1460px;
+        padding: 0 20px;
+        width: 100%;
+    }
+
+    .logo-container {
+        display: flex;
+        align-items: center;
+    }
+
+    .topbar img.logo {
+        height: 40px;
+        margin-right: 15px;
+    }
+
+    .theme-selector {
+        color: white;
+        font-size: 16px;
+        display: flex;
+        align-items: center;
+    }
+
+    .theme-selector label {
+        margin-right: 10px;
+    }
+
+    .theme-selector select {
+        padding: 5px;
+        background-color: #333;
+        color: white;
+        border: none;
+        border-radius: 4px;
+    }
+
+    /* Ensure scheme-container background is transparent */
+    .swagger-ui .scheme-container {
+        background-color: transparent !important;
+    }
+
+
+
+
+  </style>
+</head>
+
+<body>
+  <!-- Top bar with logo and theme selector -->
+    <div class="topbar">
+        <div class="topbar-content">
+            <div class="logo-container">
+                <img src="{{ config.DOCS_LOGO }}" alt="Logo" class="logo">
+            </div>
+            <div class="theme-selector">
+                <label for="theme-select">Theme:</label>
+                <select id="theme-select">
+                    <option value="auto">Auto</option>
+                    <option value="light">Light</option>
+                    <option value="dark">Dark</option>
+                </select>
+            </div>
+        </div>
+    </div>
+
+  <div id="swagger-ui"></div>
+
+  <script src="{{ config.SWAGGER_UI_BUNDLE_JS }}"></script>
+  <script src="{{ config.SWAGGER_UI_STANDALONE_PRESET_JS }}"></script>
+  <script>
+    // we can get several config items of Function type
+    // referring to https://swagger.io/docs/open-source-tools/swagger-ui/usage/configuration/
+    var funcConfigItems = ['operationsSorter', 'tagsSorter', 'onComplete', 'requestInterceptor', 'responseInterceptor', 'modelPropertyMacro', 'parameterMacro']
+
+    function parseFunc(funcStr) {
+      return new Function('"use strict"; return ' + funcStr)()
+    }
+
+    const HideInfoUrlPartsPlugin = () => {
+        return {
+            wrapComponents: {
+                InfoUrl: () => () => null,
+                InfoBasePath: () => () => null,
+            }
+        }
+    }
+
+    var baseConfig = {
+      //url: "{{ url_for('static', filename='/openapi-backend.json') }}",
+      url: "{{ config.DOCS_SOURCE }}",
+      dom_id: "#swagger-ui",
+      deepLinking: true,
+      presets: [
+        SwaggerUIBundle.presets.apis,
+        SwaggerUIStandalonePreset
+      ],
+      plugins: [
+        SwaggerUIBundle.plugins.DownloadUrl,
+        HideInfoUrlPartsPlugin
+      ],
+      layout: "{{ config.SWAGGER_UI_LAYOUT }}",
+      {% if oauth2_redirect_path %} oauth2RedirectUrl: "{{ oauth2_redirect_path }}"{% endif %}
+    };
+
+    {% if config.SWAGGER_UI_CONFIG %}
+    var userConfig = {{ config.SWAGGER_UI_CONFIG | tojson }}
+    for (var attr in userConfig) {
+      baseConfig[attr] = funcConfigItems.includes(attr) ? parseFunc(userConfig[attr]) : userConfig[attr]
+    }
+    {% endif %}
+
+    let ui;
+    var docsVersions = {{ config.DOCS_VERSIONS | tojson }};
+
+    window.onload = function () {
+      ui = SwaggerUIBundle(baseConfig);
+      const currentTheme = localStorage.getItem('theme') || 'auto';
+      document.getElementById('theme-select').value = currentTheme;
+
+      {% if config.SWAGGER_UI_OAUTH_CONFIG %}
+      oauthConfig = {};
+      var userOauthConfig = {{ config.SWAGGER_UI_OAUTH_CONFIG | tojson }};
+      for (var attr in userOauthConfig) {
+        oauthConfig[attr] = userOauthConfig[attr];
+      }
+      ui.initOAuth(oauthConfig);
+      {% endif %}
+    };
+
+    document.getElementById('theme-select').addEventListener('change', function (e) {
+      localStorage.setItem('theme', e.target.value);
+      window.location.reload();
+    });
+
+    window.addEventListener('DOMContentLoaded', function () {
+        let theme = localStorage.getItem('theme');
+        if (!theme || theme === 'auto') {
+            if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+                theme = 'dark';
+            } else {
+                theme = 'light';
+            }
+        }
+        if (theme === 'dark') {
+            const link = document.createElement('link');
+            link.rel = 'stylesheet';
+            link.type = 'text/css';
+            link.href = '/static/swagger-dark-theme.css';
+            document.head.appendChild(link);
+        }
+
+        function waitForElement(selector, callback) {
+            const element = document.querySelector(selector);
+            if (element) {
+                callback(element);
+            } else {
+                setTimeout(function() {
+                    waitForElement(selector, callback);
+                }, 100); // Try again after 100ms
+            }
+        }
+
+        if (docsVersions.length > 0) {
+            waitForElement('.information-container.wrapper', modifyContainer);
+        }
+
+        /*fetch("{{ config.DOCS_SOURCE }}")
+        .then(response => response.json())
+        .then(data => {
+            console.log(data.components.resposne_examples); // Process the OpenAPI data here
+        })
+        .catch(error => console.error('Error fetching the OpenAPI spec:', error));*/
+        waitForElement('div.wrapper', function(container){
+            const wrapperDivs = document.querySelectorAll('div.wrapper');
+
+        });
+    });
+
+    function modifyContainer(container) {
+        // Ensure docsVersions is available
+        if (!window.docsVersions || !Array.isArray(window.docsVersions)) {
+            // console.error('docsVersions is not available or not an array');
+            return;
+        }
+
+        // Create a new container for the selector and label
+        var selectorWrapper = document.createElement('div');
+        selectorWrapper.className = 'selector-wrapper';
+        selectorWrapper.style.display = 'flex';
+        selectorWrapper.style.alignItems = 'center'; // Align items vertically
+
+        // Create the label
+        var label = document.createElement('label');
+        label.innerText = 'Select API:';
+        label.style.marginRight = '10px'; // Space between label and select
+        label.setAttribute('for', 'api-selector');
+
+        // Create the select element
+        var selectElement = document.createElement('select');
+        selectElement.id = 'api-selector';
+        selectElement.className = 'api-selector';
+
+        // Get the current path
+        var currentPath = window.location.pathname;
+
+        // Create and append options based on configuration data
+        window.docsVersions.forEach(function(version) {
+            var option = document.createElement('option');
+            option.value = version.url;
+            option.text = version.name;
+            selectElement.appendChild(option);
+
+            if (currentPath.startsWith(version.url)) {
+                option.selected = true;
+            }
+        });
+
+        // Add onChange event listener
+        selectElement.addEventListener('change', function(event) {
+            var selectedUrl = event.target.value;
+            if (selectedUrl) {
+                window.location.href = selectedUrl; // Redirect to the selected URL
+            }
+        });
+
+        // Append label and select element to the selector wrapper
+        selectorWrapper.appendChild(label);
+        selectorWrapper.appendChild(selectElement);
+
+        // Insert the selector wrapper into the existing container
+        container.querySelector('section.block').appendChild(selectorWrapper);
+
+        // Adjust section styling if needed
+        container.querySelector('section.block').style.display = 'flex';
+        container.querySelector('section.block').style.justifyContent = 'space-between';
+    }
+
+
+  </script>
+</body>
+
+</html>

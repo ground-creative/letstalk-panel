@@ -1,0 +1,113 @@
+{
+  "info": {
+    "title": "Let's Talk API Docs",
+    "version": "3.0",
+    "description": "API for building assistants"
+  },
+  "tags": [
+    {
+      "name": "Workspaces"
+    },
+    {
+      "name": "Providers"
+    }
+  ],
+  "servers": [
+    {
+      "url": "http://localhost:5002/"
+    }
+  ],
+  "paths": {},
+  "openapi": "3.0.3",
+  "components": {
+    "schemas": {
+      "ProviderResponse": {
+        "type": "object",
+        "properties": {
+          "sid": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "source": {
+            "type": "string"
+          },
+          "address": {
+            "type": "string"
+          },
+          "api_key": {
+            "type": "string"
+          },
+          "workspace_sid": {
+            "type": "string"
+          },
+          "default_config": {
+            "type": "object"
+          }
+        },
+        "required": [
+          "address",
+          "api_key",
+          "default_config",
+          "name",
+          "sid",
+          "source",
+          "type",
+          "workspace_sid"
+        ]
+      },
+      "ProviderCreate": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "minLength": 5,
+            "maxLength": 30
+          },
+          "api_key": {
+            "type": "string"
+          },
+          "address": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "transcriber",
+              "model",
+              "voice"
+            ]
+          },
+          "source": {
+            "type": "string"
+          },
+          "default_config": {
+            "type": "object",
+            "default": {},
+            "additionalProperties": {
+              "nullable": true
+            }
+          }
+        },
+        "required": [
+          "address",
+          "api_key",
+          "name",
+          "source",
+          "type"
+        ]
+      }
+    },
+    "securitySchemes": {
+      "ApiKeyAuth": {
+        "type": "apiKey",
+        "in": "header",
+        "name": "X-API-Key"
+      }
+    }
+  }
+}

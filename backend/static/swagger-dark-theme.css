@@ -1,0 +1,68 @@
+body {
+    background-color: #333 !important;
+}
+
+h1, h2, h3, h4, h5, h6, p, a {
+    color: #fff !important;
+}
+
+.swagger-ui .btn.authorize {
+    background-color: #fff !important;
+}
+
+.arrow path {
+    fill: #fff !important;
+}
+
+.swagger-ui .tab li {
+    color: #fff !important;
+}
+
+.swagger-ui table thead tr td, .swagger-ui table thead tr th {
+    color: #fff !important;
+}
+
+.swagger-ui .parameter__name {
+    color: #fff !important;
+}
+
+.swagger-ui .parameter__type {
+    color: #fff !important;
+}
+
+.swagger-ui .response-col_status {
+    color: #fff !important;
+}
+
+.swagger-ui .model-title {
+    color: #fff !important;
+}
+
+.swagger-ui .model {
+    color: #fff !important;
+}
+
+
+.swagger-ui .model .property.primitive {
+    color: #fff !important;
+}
+
+.swagger-ui {
+    color: white !important;
+}
+
+.modal-ux {
+    background: #333 !important; 
+}
+
+.swagger-ui .btn {
+    color: white !important;
+}
+
+.swagger-ui .btn.authorize {
+    background-color: transparent !important;
+}
+
+.swagger-ui label {
+    color: white !important;
+}

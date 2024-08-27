@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+  <head />
+  <body>
+    <title>My Redoc</title>
+    <script src="https://cdn.redoc.ly/redoc/latest/bundles/redoc.standalone.js"> </script>
+    <div id="redoc-container"></div>
+
+    <script>
+        const specUrl = "{{ url_for('openapi.spec') }}";
+        Redoc.init(specUrl, {
+            expandResponses: "200,400",
+            settings: {
+            pagination: "item",
+            layout: "stacked"},
+            generateCodeSamples: {
+                languages: [{ lang: 'curl' }, { lang: 'Node.js' }, { lang: 'JavaScript', label: 'JS' }],
+                skipOptionalParameters: true,
+            },
+            theme: {
+                pagination: "item",
+                layout: "stacked",
+                colors: {
+                    primary: {
+                        main: '#6EC5AB',
+                    },
+                },
+                sidebar: {
+                    backgroundColor: "ivory"
+                },
+                rightPanel: {
+                    backgroundColor: "#001036",
+                    textColor: "ivory"
+                },
+                typography: {
+                    links: {
+                        color: "#0090cc"
+                    }
+                }
+            }
+        }, document.getElementById('redoc-container'))
+    </script>
+  </body>
+</html>
