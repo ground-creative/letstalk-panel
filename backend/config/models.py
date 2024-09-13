@@ -1,7 +1,8 @@
 ModelsConfig = {
-    "blueprints.backend.models": [
-        "ApiKeyModel",
-        "ProviderModel",
+    "blueprints.backend.models": ["ApiKeyModel"],
+    "blueprints.api.v2.models": [
         "ChatAssistantModel",
+        "ProviderModel",
+        "LanguageModel",
     ],
 }

@@ -17,16 +17,21 @@ services = {
             "blueprint_name": "backend_api_keys_bp",
             "kwargs": {"url_prefix": f"{EnvConfig.BACKEND_PREFIX}/workspaces"},
         },
-        "assistants": {
-            "path": "blueprints.backend.assistants.routes",
-            "blueprint_name": "backend_assistants_bp",
+        "chat_assistants": {
+            "path": "blueprints.backend.assistants.chat.routes",
+            "blueprint_name": "backend_chat_assistants_bp",
             "kwargs": {"url_prefix": f"{EnvConfig.BACKEND_PREFIX}/workspaces"},
         },
-        # "providers": {
-        #    "path": "blueprints.backend.providers.routes",
-        #    "blueprint_name": "backend_providers_bp",
-        #    "kwargs": {"url_prefix": "/backend/providers"},
-        # },
+        "providers": {
+            "path": "blueprints.backend.providers.routes",
+            "blueprint_name": "backend_providers_bp",
+            "kwargs": {"url_prefix": f"{EnvConfig.BACKEND_PREFIX}/workspaces"},
+        },
+        "help_assistant": {
+            "path": "blueprints.backend.assistants.help_assistant.routes",
+            "blueprint_name": "help_assistant_bp",
+            "kwargs": {"url_prefix": f"{EnvConfig.BACKEND_PREFIX}/help-assistant"},
+        },
     },
     "api": {
         "v1": {
@@ -35,9 +40,16 @@ services = {
             "kwargs": {"url_prefix": "/api/v1"},
         },
         "v2": {
-            "path": "blueprints.api.v2.assistants.chat.routes",
-            "blueprint_name": "api_v2_chat_bp",
-            "kwargs": {"url_prefix": "/api/v2/assistants"},
+            "chat_assistants": {
+                "path": "blueprints.api.v2.assistants.chat.routes",
+                "blueprint_name": "api_v2_chat_bp",
+                "kwargs": {"url_prefix": "/api/v2/assistants/chat"},
+            },
+            "completions": {
+                "path": "blueprints.api.v2.assistants.completions.routes",
+                "blueprint_name": "api_v2_completions_bp",
+                "kwargs": {"url_prefix": "/api/v2/assistants"},
+            },
         },
     },
 }

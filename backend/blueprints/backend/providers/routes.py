@@ -1,85 +1,86 @@
 from apiflask import APIBlueprint
-from flask import current_app as app
-from flask.views import MethodView
 from models.Response import Response as ApiResponse
-from decorators.UserAuth import require_jwt_auth
 from utils.views import AuthenticatedMethodView
-
-
-from dataclasses import field
-from apiflask.validators import Length, OneOf, URL
-from marshmallow_dataclass import dataclass
+from blueprints.api.v2.models.Providers import ProviderModel
+from blueprints.api.v2.schemas.Providers import (
+    ProviderCreate,
+    ProviderResponse,
+)
 
 backend_providers_bp = APIBlueprint("providers_blueprint", __name__)
 
 
-@dataclass
-class ProviderIn:
-    name: str = field(metadata={"required": True, "validate": Length(min=5, max=30)})
-    apiKey: str = field(metadata={"required": True})
-    address: str = field(metadata={"required": True, "validate": URL()})
-    # workspace: str = field(metadata={"required": True})
-    modelType: str = field(
-        metadata={
-            "required": True,
-            "validate": OneOf(["transcriber", "model", "voice"]),
-        }
-    )
-    sourceType: str = field(metadata={"required": True})
-    defaultConfig: dict = field(default="")
-    workspaces: str = field(
-        default="",
-        metadata={
-            "metadata": {
-                "example": "Medor",
-                "description": "This will be printed in the generated doc. "
-                'The "example" value "Medor" will be fed '
-                'into the "try it"/"Send API request".',
-            },
-        },
-    )
+class Providers(AuthenticatedMethodView):
+
+    @backend_providers_bp.doc(tags=["Providers"], security="bearerAuth")
+    @backend_providers_bp.output(ProviderResponse)
+    def get(self, workspaceID):
+
+        records = ProviderModel.get({"workspace_sid": workspaceID})
+        payload = ProviderModel.toDict(records)
+        payload_response = ApiResponse.payload_v2(
+            200,
+            "Records retrieved successfully!",
+            ProviderResponse(many=True).dump(payload),
+        )
+        return ApiResponse.output(payload_response)
+
+    @backend_providers_bp.input(ProviderCreate.Schema, arg_name="provider")
+    @backend_providers_bp.doc(tags=["Providers"], security="bearerAuth")
+    def post(self, workspaceID, provider: ProviderCreate):
+        """Create Provider"""
+        provider.workspace_sid = workspaceID
+        insert_id = ProviderModel.insert(provider)
+        payload_response = ApiResponse.payload_v2(
+            200, "Record created successfully!", {"sid": insert_id}
+        )
+        return ApiResponse.output(payload_response, 200)
 
 
-# /provider POST INSERT NEW PROVIDER
-# /provider/<providerID> DELETE DEL PROVIDER
-# /provider/<providerID> GET GET PROVIDER
-# /provider/<providerID> PATCH UPDATE PROVIDER
+backend_providers_bp.add_url_rule(
+    "/<string:workspaceID>/providers", view_func=Providers.as_view("providers")
+)
 
 
 class Provider(AuthenticatedMethodView):
-    @require_jwt_auth
-    def get(self, providerID):
-        some_config_value = app.config.get("WEB_PANEL_PREFIX")
 
-        print(some_config_value)
-        print(providerID)
+    @backend_providers_bp.doc(tags=["Providers"], security="bearerAuth")
+    @backend_providers_bp.output(ProviderResponse)
+    def get(self, workspaceID, providerID):
 
-        providers = {
-            "bbb8989gg": {"type": "model", "name": "Some name", "source": "openai"},
-            "da78da8ee": {
-                "type": "model",
-                "name": "Some other name",
-                "source": "openai",
-            },
-        }
+        record = ProviderModel.get(providerID)
+        if not record:
+            payload_response = ApiResponse.payload_v2(404, "Record not found!")
+        else:
+            payload = ProviderModel.toDict(record)
+            payload_response = ApiResponse.payload_v2(
+                200,
+                "Record retrieved successfully!",
+                ProviderResponse().dump(payload),
+            )
+        return ApiResponse.output(payload_response)
 
-        payload_response = ApiResponse.payload(True, 200, "lalalala", providers)
-        return ApiResponse.output(payload_response, 200)
+    @backend_providers_bp.input(ProviderCreate.Schema, arg_name="record")
+    @backend_providers_bp.doc(tags=["Providers"], security="bearerAuth")
+    def patch(self, workspaceID, providerID, record: ProviderCreate):
+        """Update Provider"""
+        ProviderModel.update(providerID, record)
+        payload_response = ApiResponse.payload_v2(
+            200, "Record updated successfully!", {}
+        )
+        return ApiResponse.output(payload_response)
 
-    @backend_providers_bp.input(ProviderIn.Schema, arg_name="provider")
-    def create(self, provider: ProviderIn):
-
-        payload_response = ApiResponse.payload(True, 200, "new provider created", {})
-        return ApiResponse.output(payload_response, 200)
+    @backend_providers_bp.doc(tags=["Providers"], security="bearerAuth")
+    def delete(self, workspaceID, providerID):
+        """Delete Provider"""
+        ProviderModel.delete({"sid": providerID})
+        payload_response = ApiResponse.payload_v2(
+            200, "Record deleted successfully!", {}
+        )
+        return ApiResponse.output(payload_response)
 
 
 backend_providers_bp.add_url_rule(
-    "/<string:providerID>",
+    "/<string:workspaceID>/providers/<string:providerID>",
     view_func=Provider.as_view("provider"),
-)
-
-backend_providers_bp.add_url_rule(
-    "/",
-    view_func=Provider.as_view("create"),
-    methods=["POST"],
 )

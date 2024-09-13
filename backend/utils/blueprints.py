@@ -19,9 +19,11 @@ def register_service(app, service, name=None):
                 # Register the blueprint with the app
                 app.register_blueprint(blueprint, **service.get("kwargs", {}))
             except ImportError as e:
-                print(f"Error importing module: {e}")
+                app.logger.error(f"Error importing module: {e}")
+                # print(f"Error importing module: {e}")
             except AttributeError as e:
-                print(f"Error accessing blueprint: {e}")
+                app.logger.error(f"Error accessing blueprint: {e}")
+                # print(f"Error accessing blueprint: {e}")
         else:
             # If there are sub-services, recursively register them
             for sub_service_name, sub_service in service.items():
@@ -44,12 +46,13 @@ def register_service(app, service, name=None):
             # Register the blueprint with the app
             app.register_blueprint(blueprint, url_prefix=service)
         except ImportError as e:
-            print(f"Error importing module: {e}")
+            app.logger.error(f"Error importing module: {e}")
+            # print(f"Error importing module: {e}")
         except AttributeError as e:
-            print(f"Error accessing blueprint: {e}")
+            app.logger.error(f"Error accessing blueprint: {e}")
+            # print(f"Error accessing blueprint: {e}")
 
 
 def register_blueprints(app, services):
-
     for service_name, service in services.items():
         register_service(app, service, service_name)

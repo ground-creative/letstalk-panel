@@ -37,12 +37,17 @@ def execute_function_call(functionName, args=None):
 
 class OpenAiClient:
 
-    @staticmethod
-    def set_params(apiKey, logger, logLevel="INFO"):
+    apiKey = None
+    logger = None
+    logLevel = "INFO"
 
-        OpenAiClient.apiKey = apiKey
-        OpenAiClient.logger = logger
-        OpenAiClient.logLevel = logLevel
+    @staticmethod
+    def set_params(params):
+        for key, value in params.items():
+            if hasattr(OpenAiClient, key):
+                setattr(OpenAiClient, key, value)
+            else:
+                raise AttributeError(f"Invalid attribute: {key}")
 
     @staticmethod
     def speech_to_text(audio_file, args, base_url=None):
@@ -171,15 +176,13 @@ class OpenAiClient:
         conversation_history = OpenAiClient.append_conversation_to_history(
             conversation_history, content, max_conversation_history, "assistant"
         )
-
-        print("TTTTTTTTTTT")
-        print(
-            {
-                "response_message": content,
-                "conversation_history": conversation_history,
-                "callback": callback,
-            }
-        )
+        # print(
+        #    {
+        #        "response_message": content,
+        #        "conversation_history": conversation_history,
+        #        "callback": callback,
+        #    }
+        # )
         payload_response = ApiResponse.payload(
             True,
             200,
@@ -255,11 +258,17 @@ class OpenAiClient:
     def append_conversation_to_history(
         conversation_history, message, max_conversation_history=10, role="user"
     ):
+        # Append the new message to the conversation history
         conversation_history.append({"role": role, "content": message})
 
-        if len(conversation_history) > max_conversation_history:
+        # Trim the conversation history if it exceeds the maximum length
+        if (
+            max_conversation_history > 0
+            and len(conversation_history) > max_conversation_history
+        ):
+            # Keep the first element and remove the oldest messages to keep the total count to max_conversation_history
             conversation_history = [conversation_history[0]] + conversation_history[
-                2:max_conversation_history
+                1 - max_conversation_history :
             ]
 
         return conversation_history

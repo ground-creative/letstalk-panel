@@ -53,7 +53,7 @@ class DocsConfig:
         },
         "API": {
             "title": "Let's Talk API Docs",
-            "description": "API for building assistants",
+            "description": "API for building and deploying assistants",
             "versions": [
                 {
                     "name": "API v2",
@@ -61,7 +61,7 @@ class DocsConfig:
                     "route_suffix": "v2",
                     "base_path": "/api/v2/",
                     "version": "2.0",
-                    "tags": [{"name": "Assistants"}],
+                    "tags": [{"name": "Chat Assistants"}],
                 }  # ,
                 # {
                 #    "name": "API v3",

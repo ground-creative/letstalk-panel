@@ -16,6 +16,14 @@ from utils.blueprints import register_blueprints
 from utils.get_config import get_config
 from db.db import db
 from utils.get_models import import_models
+from flask_session import Session
+from flask_limiter import Limiter
+from flask_limiter.util import get_remote_address
+from werkzeug.exceptions import TooManyRequests
+from flask_pymongo import PyMongo
+
+# from datetime import timedelta
+
 
 if EnvConfig.DEBUG_APP:
     # Add deprecations warnings
@@ -32,14 +40,30 @@ def create_app():
     app.config.from_object(EnvConfig)
     app.config.update(get_config(DocsConfig))
     app.config.update(get_config(SecurityConfig))
-    app.secret_key = app.config.get("APP_SECRET_KEY")
     app.config["SQLALCHEMY_DATABASE_URI"] = (
         f"mysql+mysqlconnector://{app.config.get('MYSQL_USER')}:{app.config.get('MYSQL_PASS')}@{app.config.get('MYSQL_HOST')}:{app.config.get('MYSQL_PORT')}/{app.config.get('MYSQL_DB')}"
     )
+    app.config["SESSION_TYPE"] = "mongodb"
+    app.config["SESSION_MONGODB"] = PyMongo(
+        app, uri=f"{app.config['MONGODB_ADDRESS']}/{app.config['SESSION_MONGODB_DB']}"
+    ).cx
+    app.config["SESSION_MONGODB_COLLECT"] = "sessions"
+    app.config["SESSION_PERMANENT"] = False
+    # app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(days=7)
 
     # Initialize extensions with the app
     db.init_app(app)
     CORS(app)
+
+    Session(app)
+
+    limiter = Limiter(
+        get_remote_address,
+        app=app,
+        default_limits=["30 per minute"],
+        storage_uri="memory://",
+        strategy="fixed-window",
+    )
 
     # Configure logging
     handler = colorlog.StreamHandler()
@@ -61,7 +85,7 @@ def create_app():
     # Set up logging for ApiResponse and OpenAiClient
     ApiResponse.set_logger(app.logger)
     OpenAiClient.set_params(
-        app.config.get("OPENAI_API_KEY"), app.logger, app.config.get("LOG_LEVEL")
+        {"logger": app.logger, "logLevel": app.config.get("LOG_LEVEL")}
     )
 
     # Register blueprints
@@ -71,10 +95,12 @@ def create_app():
     @app.error_processor
     def my_error_processor(error):
         validation_error_code = app.config.get("VALIDATION_ERROR_STATUS_CODE", 422)
+
         if validation_error_code == error.status_code and "json" in error.detail:
             json_content = error.detail.pop("json")
             final_result = {"details": json_content}
             error.detail = final_result
+
         payload_response = ApiResponse.payload_v2(
             error.status_code, error.message, error.detail
         )
@@ -108,6 +134,18 @@ def create_app():
         app.logger.info(
             f"Started processing {request.method} request from {request.remote_addr} => {request.url}"
         )
+
+        # Limit Requests
+        if request.path.startswith("/api"):
+            try:
+                limiter.limit("30 per minute")(lambda: None)()
+            except TooManyRequests:
+                abort(429)
+        elif request.path.startswith("/backend"):
+            try:
+                limiter.limit("30 per minute")(lambda: None)()
+            except TooManyRequests:
+                abort(429)
 
         # Redirect deprecated routes
         if request.path.startswith("/api") and not any(

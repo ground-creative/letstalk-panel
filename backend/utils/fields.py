@@ -42,3 +42,12 @@ def validate_pattern(value, pattern, errorMsg=None):
             else errorMsg
         )
         raise ValidationError(errorMsg)
+
+
+def validate_provider_sid(value):
+    from blueprints.api.v2.models.Providers import ProviderModel
+
+    provider = ProviderModel.get(value)
+    if not provider:
+        raise ValidationError(f"Provider id {value} not found")
+    return provider

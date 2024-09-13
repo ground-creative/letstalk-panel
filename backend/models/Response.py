@@ -92,11 +92,16 @@ class Response:
         return response
 
     @staticmethod
-    def output(data, code=None, contentType=None):
+    def output(data, code=None, headers=None, cookies=None):
         response = make_response(data, data["status_code"] if code is None else code)
 
-        if contentType:
-            response.headers["Content-Type"] = contentType
+        if headers:
+            response.headers = headers
+
+        if cookies:
+            for cookie in cookies:
+                first_key = next(iter(cookie.keys()))
+                response.set_cookie(first_key, cookie[first_key], httponly=True)
 
         Response.logger.info(f"Response: {data}")
         return response

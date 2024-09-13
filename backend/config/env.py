@@ -34,3 +34,5 @@ class EnvConfig:
     TWILIO_NUMBER = os.getenv("TWILIO_NUMBER")
     TWILIO_ACCOUNT_SID = os.getenv("TWILIO_ACCOUNT_SID")
     TWILIO_AUTH_TOKEN = os.getenv("TWILIO_AUTH_TOKEN")
+    MONGODB_ADDRESS = os.getenv("MONGODB_ADDRESS", "mongodb://localhost:27017")
+    SESSION_MONGODB_DB = os.getenv("SESSION_MONGODB_DB", "letstalk")

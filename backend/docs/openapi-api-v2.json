@@ -2,20 +2,20 @@
   "info": {
     "title": "Let's Talk API Docs",
     "version": "2.0",
-    "description": "API for building assistants"
+    "description": "API for building and deploying assistants"
   },
   "tags": [
     {
-      "name": "Assistants"
+      "name": "Chat Assistants"
     }
   ],
   "servers": [
     {
-      "url": "http://localhost:5002/"
+      "url": "http://localhost:5000/"
     }
   ],
   "paths": {
-    "/api/v2/assistants/chat": {
+    "/api/v2/assistants/chat/": {
       "get": {
         "parameters": [],
         "responses": {
@@ -35,7 +35,7 @@
                       "type": "integer"
                     },
                     "data": {
-                      "type": "object"
+                      "$ref": "#/components/schemas/ChatAssistantResponse"
                     }
                   }
                 }
@@ -72,9 +72,7 @@
                     "time": {
                       "type": "integer"
                     },
-                    "data": {
-                      "type": "object"
-                    }
+                    "data": {}
                   }
                 }
               }
@@ -131,7 +129,7 @@
                       "type": "integer"
                     },
                     "data": {
-                      "type": "object"
+                      "$ref": "#/components/schemas/ChatAssistantResponse"
                     }
                   }
                 }
@@ -177,9 +175,7 @@
                     "time": {
                       "type": "integer"
                     },
-                    "data": {
-                      "type": "object"
-                    }
+                    "data": {}
                   }
                 }
               }
@@ -233,9 +229,7 @@
                     "time": {
                       "type": "integer"
                     },
-                    "data": {
-                      "type": "object"
-                    }
+                    "data": {}
                   }
                 }
               }
@@ -253,12 +247,79 @@
           }
         ]
       }
+    },
+    "/api/v2/assistants/completions/{assistantID}": {
+      "post": {
+        "parameters": [
+          {
+            "in": "path",
+            "name": "assistantID",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "code": {
+                      "type": "integer"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "time": {
+                      "type": "integer"
+                    },
+                    "data": {}
+                  }
+                }
+              }
+            },
+            "description": "Successful response"
+          }
+        },
+        "tags": [
+          "Completions"
+        ],
+        "summary": "Post Completion",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CompletionCreate"
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ]
+      }
     }
   },
   "openapi": "3.0.3",
   "components": {
     "schemas": {
-      "ChatAssistantResponse": {
+      "HelpAssistant": {
+        "type": "object",
+        "properties": {
+          "message": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "message"
+        ]
+      },
+      "ModelConfigProviderResponse": {
         "type": "object",
         "properties": {
           "sid": {
@@ -266,17 +327,25 @@
           },
           "name": {
             "type": "string"
+          }
+        }
+      },
+      "ModelConfigResponse": {
+        "type": "object",
+        "properties": {
+          "sid": {
+            "type": "string"
           },
           "model": {
             "type": "string"
           },
-          "provider_sid": {
-            "type": "string"
-          },
-          "workspace_sid": {
+          "system_prompt": {
             "type": "string"
           },
           "temperature": {
+            "type": "number"
+          },
+          "max_tokens": {
             "type": "number"
           },
           "knowledge_base": {
@@ -288,6 +357,23 @@
           "extra_params": {
             "type": "object"
           },
+          "provider": {
+            "$ref": "#/components/schemas/ModelConfigProviderResponse"
+          }
+        }
+      },
+      "ChatAssistantResponse": {
+        "type": "object",
+        "properties": {
+          "sid": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "model": {
+            "$ref": "#/components/schemas/ModelConfigResponse"
+          },
           "created": {
             "type": "string",
             "format": null,
@@ -298,43 +384,32 @@
             "format": null,
             "pattern": null
           }
-        },
-        "required": [
-          "created",
-          "extra_params",
-          "knowledge_base",
-          "model",
-          "name",
-          "provider_sid",
-          "sid",
-          "temperature",
-          "tools",
-          "updated",
-          "workspace_sid"
-        ]
+        }
       },
-      "ChatAssistantCreate": {
+      "ModelConfig": {
         "type": "object",
         "properties": {
-          "provider": {
-            "type": "string",
-            "description": "Provider ID"
-          },
-          "name": {
-            "type": "string",
-            "minLength": 5,
-            "maxLength": 30
-          },
           "system_prompt": {
             "type": "string"
           },
           "model": {
             "type": "string"
           },
+          "provider_sid": {
+            "type": "string",
+            "description": "Provider ID"
+          },
           "temperature": {
             "type": "number",
+            "default": null,
             "minimum": 0.0,
-            "maximum": 1.0
+            "maximum": 2.0,
+            "nullable": true
+          },
+          "max_tokens": {
+            "type": "number",
+            "default": null,
+            "nullable": true
           },
           "tools": {
             "type": "object",
@@ -357,10 +432,120 @@
         },
         "required": [
           "model",
-          "name",
-          "provider",
-          "system_prompt",
-          "temperature"
+          "provider_sid",
+          "system_prompt"
+        ]
+      },
+      "ChatAssistantCreate": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "minLength": 5,
+            "maxLength": 30
+          },
+          "model": {
+            "$ref": "#/components/schemas/ModelConfig"
+          }
+        },
+        "required": [
+          "model",
+          "name"
+        ]
+      },
+      "CompletionCreateSession": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "minLength": 5,
+            "maxLength": 30,
+            "description": "A custom session id for the completion history"
+          },
+          "channel": {
+            "type": "string",
+            "minLength": 5,
+            "maxLength": 30,
+            "description": "A custom session channel. Ex: telegram"
+          }
+        },
+        "required": [
+          "channel",
+          "id"
+        ]
+      },
+      "CompletionCreateOverrides": {
+        "type": "object",
+        "properties": {
+          "system_prompt": {
+            "type": "string",
+            "default": null,
+            "nullable": true
+          },
+          "model": {
+            "type": "string",
+            "default": null,
+            "nullable": true
+          },
+          "temperature": {
+            "type": "number",
+            "default": null,
+            "minimum": 0.0,
+            "maximum": 2.0,
+            "nullable": true
+          },
+          "max_tokens": {
+            "type": "number",
+            "default": null,
+            "nullable": true
+          },
+          "tools": {
+            "type": "object",
+            "default": {},
+            "additionalProperties": {
+              "nullable": true
+            }
+          },
+          "knowledge_base": {
+            "type": "string",
+            "default": ""
+          },
+          "extra_params": {
+            "type": "object",
+            "default": {},
+            "additionalProperties": {
+              "nullable": true
+            }
+          }
+        }
+      },
+      "CompletionCreate": {
+        "type": "object",
+        "properties": {
+          "message": {
+            "type": "string"
+          },
+          "session": {
+            "default": null,
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/CompletionCreateSession"
+              }
+            ],
+            "nullable": true
+          },
+          "overrides": {
+            "default": null,
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/CompletionCreateOverrides"
+              }
+            ],
+            "nullable": true
+          }
+        },
+        "required": [
+          "message"
         ]
       },
       "ApiKeyResponse": {

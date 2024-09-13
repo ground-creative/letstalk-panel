@@ -8,12 +8,13 @@ from typing import Union, List, Optional
 class BaseModel(db.Model):
     __abstract__ = True  # Indicates this is a base class, not a table
 
+    __insert_return_column__ = "id"
+
     @classmethod
     def get(
         cls, identifier: Union[int, dict, str]
     ) -> Optional[Union["BaseModel", List["BaseModel"]]]:
         query = db.session.query(cls)
-
         if isinstance(identifier, dict):
             query = cls._generate_filter(query, identifier, cls)
             return query.all()
@@ -47,7 +48,7 @@ class BaseModel(db.Model):
         return False
 
     @classmethod
-    def insert(cls, obj) -> Optional[int]:
+    def insert(cls, obj, returnColumn=None) -> Optional[int]:
         columns = {
             column.name: (
                 json.dumps(getattr(obj, column.name, None))
@@ -61,7 +62,10 @@ class BaseModel(db.Model):
         try:
             db.session.add(instance)
             db.session.commit()
-            return instance.id
+            return_coloum = (
+                returnColumn if returnColumn else cls.__insert_return_column__
+            )
+            return getattr(instance, return_coloum)
         except SQLAlchemyError as e:
             db.session.rollback()
             raise e
@@ -78,8 +82,10 @@ class BaseModel(db.Model):
                 for column in inspect(cls).columns
                 if hasattr(obj, column.name)
             }
-
+            for column in inspect(cls).columns:
+                value = getattr(obj, column.name, None)
             query = db.session.query(cls)
+
             if isinstance(identifier, dict):
                 query = query.filter_by(**identifier)
             elif isinstance(identifier, int):
@@ -99,11 +105,13 @@ class BaseModel(db.Model):
     def to_dict(
         cls, model_instances: Union["BaseModel", List["BaseModel"]]
     ) -> Union[dict, List[dict]]:
-        # if isinstance(model_instances, list):
-        return [
-            cls._model_to_dict(model_instance) for model_instance in model_instances
-        ]
-        # return cls._model_to_dict(model_instances) if model_instances is not None else {}
+
+        if isinstance(model_instances, list):
+            return [
+                cls._model_to_dict(model_instance) for model_instance in model_instances
+            ]
+        else:
+            return cls._model_to_dict(model_instances)
 
     @classmethod
     def toDict(
@@ -119,6 +127,7 @@ class BaseModel(db.Model):
     @staticmethod
     def _model_to_dict(model_instance) -> dict:
         """Convert a SQLAlchemy model instance to a dictionary."""
+
         if model_instance is None:
             return {}
         return {
@@ -129,6 +138,7 @@ class BaseModel(db.Model):
     @staticmethod
     def _generate_filter(query, filters, model_class):
         for column, value in filters.items():
+
             if hasattr(model_class, column):
                 query = query.filter(getattr(model_class, column) == value)
             else:
@@ -136,3 +146,12 @@ class BaseModel(db.Model):
                     f"Column {column} does not exist in model {model_class.__name__}"
                 )
         return query
+
+    def __repr__(self):
+        class_name = self.__class__.__name__
+        attrs = ", ".join(
+            f"{key}={value}"
+            for key, value in vars(self).items()
+            if not key.startswith("_")
+        )
+        return f"<{class_name}({attrs})>"

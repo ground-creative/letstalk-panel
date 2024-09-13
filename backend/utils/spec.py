@@ -25,13 +25,14 @@ def update_spec(spec):
                 response_schema = details["responses"]["200"]["content"][
                     "application/json"
                 ]["schema"]["properties"]["data"]
-                if isinstance(response_schema, dict):
-                    details["responses"]["200"]["content"]["application/json"][
-                        "schema"
-                    ]["properties"]["data"] = {"type": "object"}
+                # if isinstance(response_schema, dict):
+                #    details["responses"]["200"]["content"]["application/json"][
+                #        "schema"
+                #    ]["properties"]["data"] = {"type": "object"}
                 details["responses"].pop("404", None)
                 details["responses"].pop("401", None)
                 details["responses"].pop("422", None)
+
     api_config = app.config.get("DOCS_CONFIG", {}).get("API", [])
     for api_version in api_config["versions"]:
         cloned_spec = copy.deepcopy(spec)

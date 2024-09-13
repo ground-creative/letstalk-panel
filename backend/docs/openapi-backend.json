@@ -76,6 +76,76 @@
       },
       "ChatAssistantCreate": {
         "properties": {
+          "model": {
+            "$ref": "#/components/schemas/ModelConfig"
+          },
+          "name": {
+            "maxLength": 30,
+            "minLength": 5,
+            "type": "string"
+          }
+        },
+        "required": [
+          "model",
+          "name"
+        ],
+        "type": "object"
+      },
+      "ChatAssistantResponse": {
+        "properties": {
+          "created": {
+            "format": null,
+            "pattern": null,
+            "type": "string"
+          },
+          "model": {
+            "$ref": "#/components/schemas/ModelConfigResponse"
+          },
+          "name": {
+            "type": "string"
+          },
+          "sid": {
+            "type": "string"
+          },
+          "updated": {
+            "format": null,
+            "pattern": null,
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "CompletionCreate": {
+        "properties": {
+          "message": {
+            "type": "string"
+          },
+          "overrides": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/CompletionCreateOverrides"
+              }
+            ],
+            "default": null,
+            "nullable": true
+          },
+          "session": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/CompletionCreateSession"
+              }
+            ],
+            "default": null,
+            "nullable": true
+          }
+        },
+        "required": [
+          "message"
+        ],
+        "type": "object"
+      },
+      "CompletionCreateOverrides": {
+        "properties": {
           "extra_params": {
             "additionalProperties": {
               "nullable": true
@@ -87,15 +157,92 @@
             "default": "",
             "type": "string"
           },
+          "max_tokens": {
+            "default": null,
+            "nullable": true,
+            "type": "number"
+          },
           "model": {
+            "default": null,
+            "nullable": true,
             "type": "string"
           },
-          "name": {
+          "system_prompt": {
+            "default": null,
+            "nullable": true,
+            "type": "string"
+          },
+          "temperature": {
+            "default": null,
+            "maximum": 2.0,
+            "minimum": 0.0,
+            "nullable": true,
+            "type": "number"
+          },
+          "tools": {
+            "additionalProperties": {
+              "nullable": true
+            },
+            "default": {},
+            "type": "object"
+          }
+        },
+        "type": "object"
+      },
+      "CompletionCreateSession": {
+        "properties": {
+          "channel": {
+            "description": "A custom session channel. Ex: telegram",
             "maxLength": 30,
             "minLength": 5,
             "type": "string"
           },
-          "provider": {
+          "id": {
+            "description": "A custom session id for the completion history",
+            "maxLength": 30,
+            "minLength": 5,
+            "type": "string"
+          }
+        },
+        "required": [
+          "channel",
+          "id"
+        ],
+        "type": "object"
+      },
+      "HelpAssistant": {
+        "properties": {
+          "message": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "message"
+        ],
+        "type": "object"
+      },
+      "ModelConfig": {
+        "properties": {
+          "extra_params": {
+            "additionalProperties": {
+              "nullable": true
+            },
+            "default": {},
+            "type": "object"
+          },
+          "knowledge_base": {
+            "default": "",
+            "type": "string"
+          },
+          "max_tokens": {
+            "default": null,
+            "nullable": true,
+            "type": "number"
+          },
+          "model": {
+            "type": "string"
+          },
+          "provider_sid": {
             "description": "Provider ID",
             "type": "string"
           },
@@ -103,8 +250,10 @@
             "type": "string"
           },
           "temperature": {
-            "maximum": 1.0,
+            "default": null,
+            "maximum": 2.0,
             "minimum": 0.0,
+            "nullable": true,
             "type": "number"
           },
           "tools": {
@@ -117,36 +266,43 @@
         },
         "required": [
           "model",
-          "name",
-          "provider",
-          "system_prompt",
-          "temperature"
+          "provider_sid",
+          "system_prompt"
         ],
         "type": "object"
       },
-      "ChatAssistantResponse": {
+      "ModelConfigProviderResponse": {
         "properties": {
-          "created": {
-            "format": null,
-            "pattern": null,
+          "name": {
             "type": "string"
           },
+          "sid": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "ModelConfigResponse": {
+        "properties": {
           "extra_params": {
             "type": "object"
           },
           "knowledge_base": {
             "type": "string"
           },
+          "max_tokens": {
+            "type": "number"
+          },
           "model": {
             "type": "string"
           },
-          "name": {
-            "type": "string"
-          },
-          "provider_sid": {
-            "type": "string"
+          "provider": {
+            "$ref": "#/components/schemas/ModelConfigProviderResponse"
           },
           "sid": {
+            "type": "string"
+          },
+          "system_prompt": {
             "type": "string"
           },
           "temperature": {
@@ -154,29 +310,8 @@
           },
           "tools": {
             "type": "object"
-          },
-          "updated": {
-            "format": null,
-            "pattern": null,
-            "type": "string"
-          },
-          "workspace_sid": {
-            "type": "string"
           }
         },
-        "required": [
-          "created",
-          "extra_params",
-          "knowledge_base",
-          "model",
-          "name",
-          "provider_sid",
-          "sid",
-          "temperature",
-          "tools",
-          "updated",
-          "workspace_sid"
-        ],
         "type": "object"
       },
       "ProviderCreate": {
@@ -287,6 +422,54 @@
   },
   "openapi": "3.0.3",
   "paths": {
+    "/backend/help-assistant/": {
+      "post": {
+        "description": "Completion request for the help assistant",
+        "parameters": [],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HelpAssistant"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "code": {
+                      "type": "integer"
+                    },
+                    "data": {},
+                    "message": {
+                      "type": "string"
+                    },
+                    "time": {
+                      "type": "integer"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful response"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Help Assistant Completion",
+        "tags": [
+          "Help Assistant"
+        ]
+      }
+    },
     "/backend/workspaces/{workspaceID}": {
       "delete": {
         "parameters": [
@@ -308,9 +491,7 @@
                     "code": {
                       "type": "integer"
                     },
-                    "data": {
-                      "type": "object"
-                    },
+                    "data": {},
                     "message": {
                       "type": "string"
                     },
@@ -325,7 +506,12 @@
             "description": "Successful response"
           }
         },
-        "summary": "Delete Workspaces",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Delete Workspace",
         "tags": [
           "Workspaces"
         ]
@@ -350,9 +536,7 @@
                     "code": {
                       "type": "integer"
                     },
-                    "data": {
-                      "type": "object"
-                    },
+                    "data": {},
                     "message": {
                       "type": "string"
                     },
@@ -367,7 +551,12 @@
             "description": "Successful response"
           }
         },
-        "summary": "Get Workspaces",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Get Workspace",
         "tags": [
           "Workspaces"
         ]
@@ -392,9 +581,7 @@
                     "code": {
                       "type": "integer"
                     },
-                    "data": {
-                      "type": "object"
-                    },
+                    "data": {},
                     "message": {
                       "type": "string"
                     },
@@ -409,7 +596,12 @@
             "description": "Successful response"
           }
         },
-        "summary": "Patch Workspaces",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Patch Workspace",
         "tags": [
           "Workspaces"
         ]
@@ -434,9 +626,7 @@
                     "code": {
                       "type": "integer"
                     },
-                    "data": {
-                      "type": "object"
-                    },
+                    "data": {},
                     "message": {
                       "type": "string"
                     },
@@ -451,6 +641,11 @@
             "description": "Successful response"
           }
         },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
         "summary": "Post Workspaces",
         "tags": [
           "Workspaces"
@@ -479,7 +674,7 @@
                       "type": "integer"
                     },
                     "data": {
-                      "type": "object"
+                      "$ref": "#/components/schemas/ApiKeyResponse"
                     },
                     "message": {
                       "type": "string"
@@ -534,9 +729,7 @@
                     "code": {
                       "type": "integer"
                     },
-                    "data": {
-                      "type": "object"
-                    },
+                    "data": {},
                     "message": {
                       "type": "string"
                     },
@@ -591,9 +784,7 @@
                     "code": {
                       "type": "integer"
                     },
-                    "data": {
-                      "type": "object"
-                    },
+                    "data": {},
                     "message": {
                       "type": "string"
                     },
@@ -647,7 +838,7 @@
                       "type": "integer"
                     },
                     "data": {
-                      "type": "object"
+                      "$ref": "#/components/schemas/ApiKeyResponse"
                     },
                     "message": {
                       "type": "string"
@@ -710,9 +901,7 @@
                     "code": {
                       "type": "integer"
                     },
-                    "data": {
-                      "type": "object"
-                    },
+                    "data": {},
                     "message": {
                       "type": "string"
                     },
@@ -738,7 +927,7 @@
         ]
       }
     },
-    "/backend/workspaces/{workspaceID}/assistants": {
+    "/backend/workspaces/{workspaceID}/assistants/chat": {
       "get": {
         "parameters": [
           {
@@ -760,7 +949,7 @@
                       "type": "integer"
                     },
                     "data": {
-                      "type": "object"
+                      "$ref": "#/components/schemas/ChatAssistantResponse"
                     },
                     "message": {
                       "type": "string"
@@ -781,9 +970,235 @@
             "bearerAuth": []
           }
         ],
-        "summary": "Get Assistants",
+        "summary": "Get Chat Assistants",
         "tags": [
-          "Assistants"
+          "Chat Assistants"
+        ]
+      },
+      "post": {
+        "parameters": [
+          {
+            "in": "path",
+            "name": "workspaceID",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ChatAssistantCreate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "code": {
+                      "type": "integer"
+                    },
+                    "data": {},
+                    "message": {
+                      "type": "string"
+                    },
+                    "time": {
+                      "type": "integer"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful response"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Create Chat Assistant",
+        "tags": [
+          "Chat Assistants"
+        ]
+      }
+    },
+    "/backend/workspaces/{workspaceID}/assistants/chat/{assistantID}": {
+      "delete": {
+        "parameters": [
+          {
+            "in": "path",
+            "name": "workspaceID",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "assistantID",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "code": {
+                      "type": "integer"
+                    },
+                    "data": {},
+                    "message": {
+                      "type": "string"
+                    },
+                    "time": {
+                      "type": "integer"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful response"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Delete Chat Assistant",
+        "tags": [
+          "Chat Assistants"
+        ]
+      },
+      "get": {
+        "parameters": [
+          {
+            "in": "path",
+            "name": "workspaceID",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "assistantID",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "code": {
+                      "type": "integer"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/ChatAssistantResponse"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "time": {
+                      "type": "integer"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful response"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Get Chat Assistant",
+        "tags": [
+          "Chat Assistants"
+        ]
+      },
+      "patch": {
+        "parameters": [
+          {
+            "in": "path",
+            "name": "workspaceID",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "assistantID",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ChatAssistantCreate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "code": {
+                      "type": "integer"
+                    },
+                    "data": {},
+                    "message": {
+                      "type": "string"
+                    },
+                    "time": {
+                      "type": "integer"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful response"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Update Chat Assistant",
+        "tags": [
+          "Chat Assistants"
         ]
       }
     },
@@ -809,7 +1224,7 @@
                       "type": "integer"
                     },
                     "data": {
-                      "type": "object"
+                      "$ref": "#/components/schemas/ProviderResponse"
                     },
                     "message": {
                       "type": "string"
@@ -864,9 +1279,7 @@
                     "code": {
                       "type": "integer"
                     },
-                    "data": {
-                      "type": "object"
-                    },
+                    "data": {},
                     "message": {
                       "type": "string"
                     },
@@ -921,9 +1334,7 @@
                     "code": {
                       "type": "integer"
                     },
-                    "data": {
-                      "type": "object"
-                    },
+                    "data": {},
                     "message": {
                       "type": "string"
                     },
@@ -977,7 +1388,7 @@
                       "type": "integer"
                     },
                     "data": {
-                      "type": "object"
+                      "$ref": "#/components/schemas/ProviderResponse"
                     },
                     "message": {
                       "type": "string"
@@ -1040,9 +1451,7 @@
                     "code": {
                       "type": "integer"
                     },
-                    "data": {
-                      "type": "object"
-                    },
+                    "data": {},
                     "message": {
                       "type": "string"
                     },
@@ -1071,7 +1480,7 @@
   },
   "servers": [
     {
-      "url": "http://localhost:5002/"
+      "url": "http://localhost:5000/"
     }
   ],
   "tags": [
