@@ -26,9 +26,14 @@ class ProviderModel(BaseModel):
     updated = Column(DateTime, default=func.now(), onupdate=func.now(), nullable=False)
 
     @classmethod
-    def toDict(cls, obj):
-        obj = super().toDict(obj)
-        return convert_properties({"default_config"}, obj)
+    def to_dict(cls, obj):
+        obj = super().to_dict(obj)
+        if isinstance(obj, list) and len(obj) > 0:
+            for item in obj:
+                item = convert_properties({"default_config"}, item)
+        else:
+            obj = convert_properties({"default_config"}, obj)
+        return obj
 
     @classmethod
     def insert(cls, obj):
@@ -37,5 +42,4 @@ class ProviderModel(BaseModel):
         if obj.default_config is not None:
             obj.default_config = json.dumps(obj.default_config)
 
-        super().insert(obj)
-        return obj.sid
+        return super().insert(obj)

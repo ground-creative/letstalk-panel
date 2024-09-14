@@ -1,10 +1,10 @@
 from dataclasses import field
 from marshmallow_dataclass import dataclass
-from marshmallow import validate
-from apiflask.validators import Length
-from typing import Optional
+from marshmallow import validate, Schema
+from typing import List, Dict, Any, Optional
 from utils.fields import validate_pattern
-from typing import List
+from flask_marshmallow.fields import fields
+from blueprints.api.v2.schemas.ChatAssistants import validate_tools
 
 
 @dataclass
@@ -28,49 +28,29 @@ class CompletionCreateOverrides:
         default=None,
         metadata={"required": False},
     )
-    # tools: dict = field(default_factory={})
+    tools: List[Dict[str, Any]] = field(
+        default_factory=list, metadata={"required": False, "validate": validate_tools}
+    )
     # knowledge_base: str = field(default="", metadata={"required": False})
-    knowledge_base: List[str] = field(
-        default_factory=list, metadata={"required": False}
-    )
-    extra_params: dict = field(default_factory={})
+    # knowledge_base: List[str] = field(
+    #    default_factory=list, metadata={"required": False}
+    # )
+    # extra_params: dict = field(default_factory={})
 
 
-# @dataclass
-# class CompletionCreateSession:
-
-#    session: str = field(default=None, metadata={"required": False})
-
-
-@dataclass
-class CompletionCreateSession:
-    id: str = field(
-        metadata={
-            "required": True,
-            "description": "A custom session id for the completion history",
-            "validate": [
-                Length(min=5, max=30),
-                lambda value: validate_pattern(
-                    value,
-                    pattern="^[a-zA-Z0-9 _-]*$",
-                    errorMsg="Only alphanumeric characters, spaces, underscores, and hyphens are accepted",
-                ),
-            ],
-        },
-    )
-    channel: str = field(
-        metadata={
-            "required": True,
-            "description": "A custom session channel. Ex: telegram",
-            "validate": [
-                Length(min=5, max=30),
-                lambda value: validate_pattern(
-                    value,
-                    pattern="^[a-zA-Z0-9 _-]*$",
-                    errorMsg="Only alphanumeric characters, spaces, underscores, and hyphens are accepted",
-                ),
-            ],
-        },
+class CompletionCreateSession(Schema):
+    X_Session_Id = fields.String(
+        required=False,
+        description="A custom session id to be used to keep track of the chat history.<br>Only alphanumeric characters, underscores, and hyphens are accepted. The minmum and maximum lengths 5 and 50 characters.",
+        data_key="X-Session-Id",
+        validate=[
+            validate.Length(min=5, max=50),
+            lambda value: validate_pattern(
+                value,
+                pattern="^[a-zA-Z0-9_-]*$",
+                errorMsg="Only alphanumeric characters, underscores, and hyphens are accepted",
+            ),
+        ],
     )
 
 
@@ -78,5 +58,15 @@ class CompletionCreateSession:
 class CompletionCreate:
 
     message: str = field(metadata={"required": True})
-    session: Optional[CompletionCreateSession] = None
+    max_history: int = field(
+        default=20,
+        metadata={
+            "required": False,
+            "description": "The maximum number of messages saved in the history for each sessions.<br> Use 0 to keep all messages in the history.",
+        },
+    )
     overrides: Optional[CompletionCreateOverrides] = None
+
+
+class CompletionsResponse(Schema):
+    message = fields.Str(required=True)

@@ -6,6 +6,11 @@ from blueprints.api.v2.models.Providers import ProviderModel
 from blueprints.api.v2.models.LanguageModels import LanguageModel
 
 
+def generate_random_embed_sid():
+
+    return generate_random_string(50)
+
+
 class ChatAssistantModel(BaseModel):
     __tablename__ = "assistants"
 
@@ -21,6 +26,7 @@ class ChatAssistantModel(BaseModel):
     model_config_sid = Column(String(50), nullable=True)
     transcriber_config_sid = Column(String(50), nullable=True)
     voice_config_sid = Column(String(50), nullable=True)
+    embed_sid = Column(String(50), nullable=True, default=generate_random_embed_sid)
     status = Column(SmallInteger, nullable=False, default=1)
     created = Column(DateTime, default=func.now(), nullable=False)
     updated = Column(DateTime, default=func.now(), onupdate=func.now(), nullable=False)

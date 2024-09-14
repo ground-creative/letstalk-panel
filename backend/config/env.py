@@ -23,6 +23,8 @@ class EnvConfig:
     AUTH0_DOMAIN = os.getenv("AUTH0_DOMAIN")
     API_AUDIENCE = os.getenv("API_AUDIENCE", "https://letstalk")
     ALGORITHMS = os.getenv("ALGORITHMS", "RS256").split(",")
+    SERVERS = [{"url": "https://letstalk.serveo.net"}]
+
     # @ Deprecated
     EXTERNAL_ADDRESS = os.getenv("EXTERNAL_ADDRESS", "")
     OPENVOICE_API_URL = os.getenv("OPENVOICE_API_URL", "http://127.0.0.1:5001")

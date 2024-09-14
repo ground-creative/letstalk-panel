@@ -1,0 +1,50 @@
+.chat-window .input-area textarea {
+    scrollbar-color: #888 #393030;
+}
+
+.input-area textarea {
+    color: lightgrey;
+}
+
+textarea::placeholder {
+  color: white;  
+}
+
+.input-area button {
+    background-color: #7b837b;
+}
+
+.input-area button:hover {
+    background-color: #adb7ad;
+}
+
+.message.user {
+    background-color: #2a2626;
+    color: lightgrey;
+}
+
+.message.agent {
+    color: lightgrey;
+}
+
+.code-block {
+    color: lightgrey;
+    background-color: #100f0f;
+}
+
+.copy-button {
+    background-color: blue;
+    color: white;
+}
+
+.copy-button:hover {
+    background-color: #0056b3;
+}
+
+.scroll-to-bottom {
+    color: #fff;
+}
+
+#send-button {
+    color: white;
+}

@@ -1,0 +1,182 @@
+@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&family=Source+Code+Pro:wght@400&display=swap');
+
+body { 
+    font-family: Arial, sans-serif; 
+    background-color: transparent;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    box-sizing: border-box;
+    height: 100%;
+}
+
+.container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+    max-width: 1000px;
+    height: 100vh;
+    overflow: hidden;
+}
+
+.chat-container {
+    width: 100%;
+    height: 100%;
+    background-color: transparent;
+    border-radius: 10px;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+}
+
+.chat-window {
+    flex-grow: 1;
+    padding: 15px;
+    overflow-y: auto;
+    background-color: transparent;
+    display: flex;
+    flex-direction: column;
+    gap: 10px; /* Add space between messages */
+    overflow-y: auto;
+    overflow-x: hidden;
+    scrollbar-width: thin;
+}
+
+.input-area {
+    padding: 10px 15px;
+    display: flex;
+    background-color: transparent;
+}
+
+.input-area textarea {
+    width: 100%;
+    padding: 12px 0 12px 14px !important;
+    border-radius: 16px;
+    outline: none;
+    font-size: 16px;
+    resize: none;
+    max-height: 150px;
+    overflow-y: auto;
+    box-sizing: border-box;
+    height: 50px;
+    background: transparent;
+    scrollbar-width: thin;
+}
+
+textarea::placeholder {
+    opacity: 0.5;
+}
+
+
+.input-area button {
+    padding: 10px 20px;
+    margin-left: 10px;
+    border: none;
+    border-radius: 16px;
+    cursor: pointer;
+    font-size: 16px;
+    max-height: 50px;
+}
+.message {
+    display: flex;
+    flex-direction: column;
+    padding: 10px 15px;
+    border-radius: 16px;
+    max-width: 100%; /* Ensure messages do not exceed container width */
+    word-wrap: break-word; /* Break long words to avoid overflow */
+    box-sizing: border-box; /* Ensure padding is included in width */
+    font-family: 'Roboto', sans-serif;
+    line-height: 1.5;
+}
+
+.message.user {
+    align-self: flex-end;
+    text-align: left;
+    margin-left: auto;
+}
+
+.message.agent {
+    align-self: flex-start;
+    text-align: left;
+    margin-right: auto;
+    width: 100% !important;
+    padding: 10px 0px 0px 5px !important;
+}
+
+.message-content {
+    width: 100% !important;
+}
+
+.icon-and-content {
+    display: flex;
+    align-items: flex-start;
+    width: 100%;
+}
+
+.chat-bubble-icon {
+    width: 20px;
+    height: 20px;
+    margin-right: 6px;
+    margin-top: -10px;
+}
+
+.code-block {
+    position: relative;
+    padding: 10px;
+    border-radius: 5px;
+    margin: 0;
+    overflow-x: auto;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.copy-button {
+    width: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    position: absolute;
+    top: 5px;
+    right: 10px;
+    padding: 0;
+    cursor: pointer;
+    border: none;
+}
+
+.copy-button i {
+    margin: 5px;
+    font-size: 14px;
+    vertical-align: middle;
+}
+
+.scroll-to-bottom {
+    position: absolute;
+    bottom: 130px; /* Adjust this as needed */
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: #333;
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+    z-index: 9999;
+}
+
+.scroll-icon {
+    font-size: 25px;
+}
+
+@media (min-width: 800px) {
+    .chat-window {
+        margin-right: 20px;
+    }
+}

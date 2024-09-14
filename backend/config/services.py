@@ -25,7 +25,7 @@ services = {
         "providers": {
             "path": "blueprints.backend.providers.routes",
             "blueprint_name": "backend_providers_bp",
-            "kwargs": {"url_prefix": f"{EnvConfig.BACKEND_PREFIX}/workspaces"},
+            "kwargs": {"url_prefix": f"{EnvConfig.BACKEND_PREFIX}/"},
         },
         "help_assistant": {
             "path": "blueprints.backend.assistants.help_assistant.routes",
@@ -55,6 +55,18 @@ services = {
                 "blueprint_name": "api_v2_completions_bp",
                 "kwargs": {"url_prefix": "/api/v2/assistants"},
             },
+            "Knowledge_base": {
+                "path": "blueprints.api.v2.knowledge_base.routes",
+                "blueprint_name": "api_v2_knowledge_base_bp",
+                "kwargs": {"url_prefix": f"/api/v2/knowledge-base"},
+            },
+        },
+    },
+    "embed": {
+        "chat": {
+            "path": "blueprints.embed.chat.routes",
+            "blueprint_name": "embed_chat_bp",
+            "kwargs": {"url_prefix": "/"},
         },
     },
 }

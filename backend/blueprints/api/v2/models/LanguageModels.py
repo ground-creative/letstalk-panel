@@ -1,6 +1,6 @@
 from sqlalchemy import Column, String, SmallInteger, Integer, Text, Float, DateTime
 from db.base import BaseModel
-from utils.fields import generate_random_string
+from utils.fields import generate_random_string, convert_properties, convert_list
 from sqlalchemy.sql import func
 import json
 
@@ -53,3 +53,15 @@ class LanguageModel(BaseModel):
         obj.knowledge_base = json.dumps(obj.knowledge_base)
         obj.tools = json.dumps(obj.tools, indent=4)
         return super().update(identifier, obj)
+
+    @classmethod
+    def to_dict(cls, obj):
+        obj = super().to_dict(obj)
+
+        if isinstance(obj, list) and len(obj) > 0:
+            for item in obj:
+                item = convert_properties({"knowledge_base", "tools"}, item)
+        elif obj is not None:
+            obj = convert_properties({"knowledge_base", "tools"}, obj)
+
+        return obj

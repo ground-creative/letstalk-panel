@@ -1,7 +1,7 @@
 from apiflask import APIBlueprint
-from flask import current_app as app
+from flask import current_app as app, g
 from models.Response import Response as ApiResponse
-from utils.views import AuthenticatedMethodView
+from utils.views import APIAuthenticatedMethodView
 from marshmallow import fields
 from services.knowledge_base_service import KnowledgeBaseService
 from blueprints.api.v2.schemas.KnowledgeBase import (
@@ -9,20 +9,20 @@ from blueprints.api.v2.schemas.KnowledgeBase import (
     KnowledgeBaseResponse,
 )
 
-backend_knowledge_base_bp = APIBlueprint(
-    "backend_knowledge_base_blueprint",
+api_v2_knowledge_base_bp = APIBlueprint(
+    "api_v2_knowledge_base_blueprint",
     __name__,
 )
 
 
-class KnowledgeBase(AuthenticatedMethodView):
+class KnowledgeBase(APIAuthenticatedMethodView):
 
-    @backend_knowledge_base_bp.doc(tags=["Knowledge Base"], security="bearerAuth")
-    @backend_knowledge_base_bp.output(KnowledgeBaseResponse(many=True))
-    def get(self, workspaceID):
+    @api_v2_knowledge_base_bp.doc(tags=["Knowledge Base"], security="ApiKeyAuth")
+    @api_v2_knowledge_base_bp.output(KnowledgeBaseResponse(many=True))
+    def get(self):
         """Get Knowledge Base Files"""
 
-        knowledge_base_service = KnowledgeBaseService(workspaceID)
+        knowledge_base_service = KnowledgeBaseService(g.api_key.workspace_sid)
         data = knowledge_base_service.get_files()
         payload_response = ApiResponse.payload_v2(
             200,
@@ -31,12 +31,12 @@ class KnowledgeBase(AuthenticatedMethodView):
         )
         return ApiResponse.output(payload_response)
 
-    @backend_knowledge_base_bp.doc(tags=["Knowledge Base"], security="bearerAuth")
-    @backend_knowledge_base_bp.input(KnowledgeBaseFile, location="files")
-    def post(self, workspaceID, files_data):
+    @api_v2_knowledge_base_bp.doc(tags=["Knowledge Base"], security="ApiKeyAuth")
+    @api_v2_knowledge_base_bp.input(KnowledgeBaseFile, location="files")
+    def post(self, files_data):
         """Post Knowledge Base File"""
 
-        knowledge_base_service = KnowledgeBaseService(workspaceID)
+        knowledge_base_service = KnowledgeBaseService(g.api_key.workspace_sid)
         try:
             file = files_data["filename"]
             knowledge_base_service.save_file(file)
@@ -50,14 +50,13 @@ class KnowledgeBase(AuthenticatedMethodView):
             payload_response = ApiResponse.payload_v2(500, "Internal Server Error!")
             return ApiResponse.output(payload_response)
 
-    @backend_knowledge_base_bp.doc(tags=["Knowledge Base"], security="bearerAuth")
-    @backend_knowledge_base_bp.input(
+    @api_v2_knowledge_base_bp.doc(tags=["Knowledge Base"], security="ApiKeyAuth")
+    @api_v2_knowledge_base_bp.input(
         {"filename": fields.Str(required=True)}, location="query"
     )
-    def delete(self, workspaceID, query_data):
+    def delete(self, query_data):
         """Delete Knowledge Base File"""
-
-        knowledge_base_service = KnowledgeBaseService(workspaceID)
+        knowledge_base_service = KnowledgeBaseService(g.api_key.workspace_sid)
 
         if not any(
             query_data["filename"] == file["filename"]
@@ -77,11 +76,11 @@ class KnowledgeBase(AuthenticatedMethodView):
             return ApiResponse.output(payload_response)
 
         knowledge_base_service.delete_file(query_data["filename"])
-        payload_response = ApiResponse.payload_v2(200, "File deleted successfully!")
+        payload_response = ApiResponse.payload_v2(200, "Record deleted successfully!")
         return ApiResponse.output(payload_response)
 
 
-backend_knowledge_base_bp.add_url_rule(
-    "/<string:workspaceID>/knowledge-base",
+api_v2_knowledge_base_bp.add_url_rule(
+    "/",
     view_func=KnowledgeBase.as_view("knowledge_base"),
 )

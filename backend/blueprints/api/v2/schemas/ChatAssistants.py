@@ -225,7 +225,7 @@ class ChatAssistantCreate:
         metadata={
             "required": True,
             "validate": [
-                Length(min=5, max=30),
+                Length(min=5, max=50),
                 lambda value: validate_pattern(
                     value,
                     pattern="^[a-zA-Z0-9 _-]*$",
@@ -293,6 +293,7 @@ class ModelConfigResponse(Schema):
 class ChatAssistantResponse(Schema):
     sid = fields.Str()
     name = fields.Str()
+    embed_sid = fields.Str()
     model = fields.Nested(ModelConfigResponse)
     created = fields.DateTime(format="%Y-%m-%d %H:%M:%S")
     updated = fields.DateTime(format="%Y-%m-%d %H:%M:%S")

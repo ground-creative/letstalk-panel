@@ -2,19 +2,17 @@ import requests, json
 from typing import List, Dict, Any
 from flask import current_app as app, g
 from langchain_openai import ChatOpenAI, OpenAIEmbeddings
-from langchain_ollama import ChatOllama
+from langchain_cohere import ChatCohere, CohereEmbeddings
 from langchain_community.embeddings import OllamaEmbeddings
+from langchain_ollama import ChatOllama
+from langchain_anthropic import ChatAnthropic
 from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
 from langchain_core.messages import HumanMessage, AIMessage
 from langchain_community.chat_message_histories import ChatMessageHistory
 from langchain.tools import StructuredTool
 from pydantic import BaseModel, create_model
 from typing import Optional
-from utils.session_utils import (
-    save_session,
-    get_session,
-    get_session_prefix as utils_get_session_prefix,
-)
+from utils.session_utils import save_session, get_session
 
 
 def init_model(engine, **kwargs):
@@ -23,6 +21,10 @@ def init_model(engine, **kwargs):
 
         if engine == "openai":
             return True, ChatOpenAI(**kwargs)
+        elif engine == "anthropic":
+            return True, ChatAnthropic(**kwargs)
+        elif engine == "cohere":
+            return True, ChatCohere(**kwargs)
         elif engine == "ollama":
             return True, ChatOllama(**kwargs)
         else:
@@ -40,6 +42,10 @@ def init_embeddings(engine, **kwargs):
 
         if engine == "openai":
             return True, OpenAIEmbeddings(**kwargs)
+        elif engine == "anthropic":
+            return True, OpenAIEmbeddings(**kwargs)
+        elif engine == "cohere":
+            return True, CohereEmbeddings(**kwargs)
         elif engine == "ollama":
             return True, OllamaEmbeddings(**kwargs)
         else:
@@ -248,20 +254,24 @@ def get_chat_history(session_id: str):
 
 def cut_chat_history(messages, max_size=10):
 
-    # chat_object = ChatMessageHistory()
-    # chat_object.add_messages(chat_history)
-
     if max_size > 0 and len(messages) > max_size:
         messages = messages[-max_size:]
-        # print("DDDDDDDDDDDDDDDDDDDDDDDDd")
-        # print("DDDDDDDDDDDDDDDDDDDDDDDDd")
-        # print("DDDDDDDDDDDDDDDDDDDDDDDDd")
-        # print(messages)
-        # print("DDDDDDDDDDDDDDDDDDDDDDDDd")
-        # print("DDDDDDDDDDDDDDDDDDDDDDDDd")
-        # print("DDDDDDDDDDDDDDDDDDDDDDDDd")
 
     return messages
+
+
+def format_error(source, e):
+
+    if not hasattr(e, "body"):
+        return 500, str(e)
+    if source == "openai":
+        return format_openai_error(e)
+    if source == "anthropic":
+        return format_anthropic_error(e)
+    if source == "cohere":
+        return format_cohere_error(e)
+    else:
+        return 500, str(e)
 
 
 def format_openai_error(e):
@@ -284,6 +294,37 @@ def format_openai_error(e):
     return status_code, response_message
 
 
-def get_session_prefix(session_id):
+def format_anthropic_error(e):
 
-    return utils_get_session_prefix(session_id)
+    if e.body is not None:
+        if "error" in e.body and "message" in e.body["error"]:
+            response_message = e.body["error"]["message"]
+        else:
+            response_message = "Unknown error"
+    else:
+        response_message = "Unknown error"
+
+    if hasattr(e, "status_code"):
+        status_code = e.status_code
+    else:
+        status_code = 500
+
+    return status_code, response_message
+
+
+def format_cohere_error(e):
+
+    if e.body is not None:
+        if "message" in e.body:
+            response_message = e.body["message"]
+        else:
+            response_message = "Unknown error"
+    else:
+        response_message = "Unknown error"
+
+    if hasattr(e, "status_code"):
+        status_code = e.status_code
+    else:
+        status_code = 500
+
+    return status_code, response_message

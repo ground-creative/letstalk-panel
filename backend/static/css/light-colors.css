@@ -1,0 +1,42 @@
+.input-area textarea {
+    border: 1px solid #ddd;
+}
+
+.input-area button {
+    color: white;
+    background-color: #4CAF50;
+}
+
+.input-area button:hover {
+    background-color: #45a049;
+}
+
+.message.user {
+    background-color: #f1f0f0;
+}
+
+.message.agent {
+    color: grey;
+}
+
+.code-block {
+    color: lightgrey;
+    background-color: #100f0f;
+}
+
+.copy-button {
+    background-color: blue;
+    color: white;
+}
+
+.copy-button:hover {
+    background-color: #0056b3;
+}
+
+.scroll-to-bottom {
+    color: #fff;
+}
+
+#send-button {
+    color: white;
+}

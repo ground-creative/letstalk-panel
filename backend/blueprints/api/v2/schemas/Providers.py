@@ -35,6 +35,30 @@ class ProviderCreate:
     )
 
 
+@dataclass
+class TestConnection:
+    type: str = field(
+        metadata={
+            "required": True,
+            "validate": OneOf(["transcriber", "model", "voice"]),
+        }
+    )
+    source: str = field(
+        metadata={
+            "required": True,
+            "validate": OneOf(["cohere", "anthropic", "ollama", "openai"]),
+        }
+    )
+
+    api_key: str = field(metadata={"required": True})
+    address: str = field(metadata={"required": True, "validate": URL()})
+    model: str = field(metadata={"required": True})
+    args: dict = field(
+        default_factory={},
+        metadata={"description": "Any extra arguments to pass to the model"},
+    )
+
+
 class ProviderResponse(Schema):
     sid = fields.Str(required=True)
     type = fields.Str(required=True)

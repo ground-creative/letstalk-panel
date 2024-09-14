@@ -1,13 +1,17 @@
-import copy
-import json
-from flask import current_app as app
+import copy, json
+from flask import current_app as app, request
 
 
 def update_spec(spec):
     """Update OpenAPI spec and save to file."""
-    print("Updating OpenAPI spec...")
+
+    app.logger.info("Updating OpenAPI spec...")
     spec["components"]["schemas"].pop("HTTPError")
     spec["components"]["schemas"].pop("ValidationError")
+
+    if "servers" in spec:
+        for server in spec["servers"]:
+            server["url"] = server["url"].replace("{@SERVER}", request.host)
     # spec["components"]["response_examples"] = {
     #    "AuthenticationErrorResponse": {
     #        "description": "SOME BLAHBLAHB BLAHBAS BLAB AHSDA BLA DAHD",
@@ -22,9 +26,9 @@ def update_spec(spec):
     for path, methods in spec["paths"].items():
         for method, details in methods.items():
             if "responses" in details:
-                response_schema = details["responses"]["200"]["content"][
-                    "application/json"
-                ]["schema"]["properties"]["data"]
+                # response_schema = details["responses"]["200"]["content"][
+                #    "application/json"
+                # ]["schema"]["properties"]["data"]
                 # if isinstance(response_schema, dict):
                 #    details["responses"]["200"]["content"]["application/json"][
                 #        "schema"
@@ -58,16 +62,19 @@ def update_spec(spec):
         try:
             with open(f"docs/openapi-api-{api_version['route_suffix']}.json", "w") as f:
                 json.dump(cloned_spec, f, indent=2)
-            print(
+            app.logger.info(
                 f"docs/openapi-api-{api_version['route_suffix']}.json file has been created successfully."
             )
         except Exception as e:
-            print(f"Error writing openapi-api-{api_version['route_suffix']}.json: {e}")
+            app.logger.info(
+                f"Error writing openapi-api-{api_version['route_suffix']}.json: {e}"
+            )
 
     backend_config = app.config.get("DOCS_CONFIG", {}).get("BACKEND", [])
     spec["info"]["title"] = backend_config["title"]
     spec["info"]["version"] = backend_config["version"]
     spec["info"]["description"] = backend_config["description"]
+
     # spec["info"][
     #    "description"
     # ] = "<details><summary>wow</summary> look at this!</details>"
@@ -90,6 +97,6 @@ def update_spec(spec):
     # except Exception as e:
     #     print(f"Error writing api_v2.json: {e}")
 
-    print(f"docs/openapi-backend.json file has been updated successfully.")
+    app.logger.info(f"docs/openapi-backend.json file has been updated successfully.")
 
     return spec

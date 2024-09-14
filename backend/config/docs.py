@@ -1,4 +1,4 @@
-from apiflask import APIFlask, Schema
+from apiflask import Schema
 from apiflask.fields import String, Integer, Dict
 
 
@@ -37,19 +37,25 @@ class DocsConfig:
     TAGS = [
         # {"name": "Workspaces", "description": "Operations to manage workspaces"},
         # {"name": "Providers", "description": "Operations to manage providers"},
-        "Workspaces",
+        "API Keys",
+        "Chat Assistants",
+        "API Keys",
+        "Help Assistant",
+        "Knowledge Base",
         "Providers",
+        "Workspaces",
     ]
     DOCS_CONFIG = {
         "BACKEND": {
             "title": "Let's Talk Backend API",
             "description": "API to manage data in the frontend panel",
             "version": "1.0",
-            "tags": [
-                {"name": "Workspaces"},
-                {"name": "Providers"},
-                {"name": "Api Keys"},
-            ],
+            # "tags": [
+            #    {"name": "Workspaces"},
+            #    {"name": "Providers"},
+            #    {"name": "Api Keys"},
+            # ],
+            # "servers": [{"url": "http://letstalk.serveo.net:5000"}],
         },
         "API": {
             "title": "Let's Talk API Docs",

@@ -80,7 +80,7 @@
             "$ref": "#/components/schemas/ModelConfig"
           },
           "name": {
-            "maxLength": 30,
+            "maxLength": 50,
             "minLength": 5,
             "type": "string"
           }
@@ -96,6 +96,9 @@
           "created": {
             "format": null,
             "pattern": null,
+            "type": "string"
+          },
+          "embed_sid": {
             "type": "string"
           },
           "model": {
@@ -117,6 +120,11 @@
       },
       "CompletionCreate": {
         "properties": {
+          "max_history": {
+            "default": 20,
+            "description": "The maximum number of messages saved in the history for each sessions.<br> Use 0 to keep all messages in the history.",
+            "type": "integer"
+          },
           "message": {
             "type": "string"
           },
@@ -124,15 +132,6 @@
             "allOf": [
               {
                 "$ref": "#/components/schemas/CompletionCreateOverrides"
-              }
-            ],
-            "default": null,
-            "nullable": true
-          },
-          "session": {
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/CompletionCreateSession"
               }
             ],
             "default": null,
@@ -146,19 +145,6 @@
       },
       "CompletionCreateOverrides": {
         "properties": {
-          "extra_params": {
-            "additionalProperties": {
-              "nullable": true
-            },
-            "default": {},
-            "type": "object"
-          },
-          "knowledge_base": {
-            "items": {
-              "type": "string"
-            },
-            "type": "array"
-          },
           "max_tokens": {
             "default": null,
             "nullable": true,
@@ -180,32 +166,20 @@
             "minimum": 0.0,
             "nullable": true,
             "type": "number"
-          }
-        },
-        "type": "object"
-      },
-      "CompletionCreateSession": {
-        "properties": {
-          "channel": {
-            "description": "A custom session channel. Ex: telegram",
-            "maxLength": 30,
-            "minLength": 5,
-            "type": "string"
           },
-          "id": {
-            "description": "A custom session id for the completion history",
-            "maxLength": 30,
-            "minLength": 5,
-            "type": "string"
+          "tools": {
+            "items": {
+              "additionalProperties": {
+                "nullable": true
+              },
+              "type": "object"
+            },
+            "type": "array"
           }
         },
-        "required": [
-          "channel",
-          "id"
-        ],
         "type": "object"
       },
-      "HelpAssistant": {
+      "CompletionsResponse": {
         "properties": {
           "message": {
             "type": "string"
@@ -213,6 +187,51 @@
         },
         "required": [
           "message"
+        ],
+        "type": "object"
+      },
+      "HelpAssistant": {
+        "properties": {
+          "max_history": {
+            "default": 20,
+            "description": "The maximum number of messages saved in the history for each sessions.<br> Use 0 to keep all messages in the history.",
+            "type": "integer"
+          },
+          "message": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "message"
+        ],
+        "type": "object"
+      },
+      "KnowledgeBaseFile": {
+        "properties": {
+          "filename": {
+            "format": "binary",
+            "type": "string",
+            "x-maximum": "30 MB"
+          }
+        },
+        "type": "object"
+      },
+      "KnowledgeBaseResponse": {
+        "properties": {
+          "filename": {
+            "type": "string"
+          },
+          "mime_type": {
+            "type": "string"
+          },
+          "size": {
+            "type": "integer"
+          }
+        },
+        "required": [
+          "filename",
+          "mime_type",
+          "size"
         ],
         "type": "object"
       },
@@ -495,6 +514,52 @@
           "workspace_sid"
         ],
         "type": "object"
+      },
+      "TestConnection": {
+        "properties": {
+          "address": {
+            "type": "string"
+          },
+          "api_key": {
+            "type": "string"
+          },
+          "args": {
+            "additionalProperties": {
+              "nullable": true
+            },
+            "default": {},
+            "description": "Any extra arguments to pass to the model",
+            "type": "object"
+          },
+          "model": {
+            "type": "string"
+          },
+          "source": {
+            "enum": [
+              "cohere",
+              "anthropic",
+              "ollama",
+              "openai"
+            ],
+            "type": "string"
+          },
+          "type": {
+            "enum": [
+              "transcriber",
+              "model",
+              "voice"
+            ],
+            "type": "string"
+          }
+        },
+        "required": [
+          "address",
+          "api_key",
+          "model",
+          "source",
+          "type"
+        ],
+        "type": "object"
       }
     },
     "securitySchemes": {
@@ -515,7 +580,19 @@
     "/backend/help-assistant/": {
       "post": {
         "description": "Completion request for the help assistant",
-        "parameters": [],
+        "parameters": [
+          {
+            "description": "A custom session id to be used to keep track of the chat history.<br>Only alphanumeric characters, underscores, and hyphens are accepted. The minmum and maximum lengths 5 and 50 characters.",
+            "in": "header",
+            "name": "X-Session-Id",
+            "required": false,
+            "schema": {
+              "maxLength": 50,
+              "minLength": 5,
+              "type": "string"
+            }
+          }
+        ],
         "requestBody": {
           "content": {
             "application/json": {
@@ -534,7 +611,9 @@
                     "code": {
                       "type": "integer"
                     },
-                    "data": {},
+                    "data": {
+                      "$ref": "#/components/schemas/CompletionsResponse"
+                    },
                     "message": {
                       "type": "string"
                     },
@@ -557,6 +636,55 @@
         "summary": "Help Assistant Completion",
         "tags": [
           "Help Assistant"
+        ]
+      }
+    },
+    "/backend/test-connection": {
+      "post": {
+        "parameters": [],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TestConnection"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "code": {
+                      "type": "integer"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/CompletionsResponse"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "time": {
+                      "type": "integer"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful response"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Test Connection",
+        "tags": [
+          "Providers"
         ]
       }
     },
@@ -1293,11 +1421,19 @@
       }
     },
     "/backend/workspaces/{workspaceID}/knowledge-base": {
-      "get": {
+      "delete": {
         "parameters": [
           {
             "in": "path",
             "name": "workspaceID",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "filename",
             "required": true,
             "schema": {
               "type": "string"
@@ -1333,7 +1469,111 @@
             "bearerAuth": []
           }
         ],
+        "summary": "Delete Knowledge Base File",
+        "tags": [
+          "Knowledge Base"
+        ]
+      },
+      "get": {
+        "parameters": [
+          {
+            "in": "path",
+            "name": "workspaceID",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "code": {
+                      "type": "integer"
+                    },
+                    "data": {
+                      "items": {
+                        "$ref": "#/components/schemas/KnowledgeBaseResponse"
+                      },
+                      "type": "array"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "time": {
+                      "type": "integer"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful response"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
         "summary": "Get Knowledge Base Files",
+        "tags": [
+          "Knowledge Base"
+        ]
+      },
+      "post": {
+        "parameters": [
+          {
+            "in": "path",
+            "name": "workspaceID",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "$ref": "#/components/schemas/KnowledgeBaseFile"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "code": {
+                      "type": "integer"
+                    },
+                    "data": {},
+                    "message": {
+                      "type": "string"
+                    },
+                    "time": {
+                      "type": "integer"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful response"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Post Knowledge Base File",
         "tags": [
           "Knowledge Base"
         ]
@@ -1617,15 +1857,30 @@
   },
   "servers": [
     {
-      "url": "http://localhost:5000/"
+      "url": "https://letstalk.serveo.net"
     }
   ],
   "tags": [
     {
-      "name": "Workspaces"
+      "name": "API Keys"
+    },
+    {
+      "name": "Chat Assistants"
+    },
+    {
+      "name": "API Keys"
+    },
+    {
+      "name": "Help Assistant"
+    },
+    {
+      "name": "Knowledge Base"
     },
     {
       "name": "Providers"
+    },
+    {
+      "name": "Workspaces"
     }
   ]
 }

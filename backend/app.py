@@ -1,5 +1,5 @@
 import colorlog, time, warnings
-from flask import request, redirect, render_template, abort, g, send_file
+from flask import request, redirect, render_template, abort, g, render_template_string
 from flask_cors import CORS
 from flask.cli import with_appcontext
 from apiflask import APIFlask
@@ -21,9 +21,6 @@ from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
 from werkzeug.exceptions import TooManyRequests
 from flask_pymongo import PyMongo
-
-# from datetime import timedelta
-
 
 if EnvConfig.DEBUG_APP:
     # Add deprecations warnings
@@ -192,12 +189,6 @@ def create_app():
         app.logger.info(
             f"Finished processing {request.method} request from {request.remote_addr} => {request.url}"
         )
-
-    # ?????????????????
-    @app.route("/play-audio")
-    def play_audio():
-        file_path = request.args.get("file")
-        return send_file(file_path, mimetype="audio/wav")
 
     # Handle 404 errors
     @app.errorhandler(404)

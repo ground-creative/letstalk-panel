@@ -1,0 +1,209 @@
+@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&family=Source+Code+Pro:wght@400&display=swap');
+
+body { 
+    font-family: Arial, sans-serif; 
+    background-color: #f4f4f9;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    /*height: 100vh;*/
+    box-sizing: border-box;
+}
+
+.container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+    max-width: 1000px; /* Adjust the max-width if needed */
+    height: 90vh; /* Adjust height for spacing */
+    /*margin: 20px;*/ /* Add margin for breathing space */
+}
+
+.header {
+    display: flex;
+    align-items: center;
+    margin-bottom: 20px; /* Space between header and chat container */
+}
+
+.header img {
+    width: 30px; /* Adjust size as needed */
+    height: 30px; /* Adjust size as needed */
+    margin-right: 10px; /* Space between logo and title */
+}
+
+.header h1 {
+    font-size: 24px;
+    color: grey;
+    margin: 0; /* Remove default margin */
+}
+
+.chat-container {
+    width: 100%;
+    height: 100%;
+    background-color: white;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    border-radius: 10px;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+}
+
+.chat-window {
+    flex-grow: 1;
+    padding: 15px;
+    overflow-y: auto;
+    border-bottom: 1px solid #ccc;
+    background-color: #fafafa;
+    display: flex;
+    flex-direction: column;
+    gap: 10px; /* Add space between messages */
+}
+
+.input-area {
+    padding: 10px;
+    display: flex;
+    border-top: 1px solid #ccc;
+    background-color: #f4f4f9;
+}
+
+.input-area textarea {
+    width: 100%;
+    padding: 12px 0 12px 14px !important;
+    border: 1px solid #ddd;
+    border-radius: 20px;
+    outline: none;
+    font-size: 16px;
+    resize: none;
+    max-height: 150px;
+    overflow-y: auto;
+    box-sizing: border-box;
+    height: 50px;
+}
+
+
+.input-area button {
+    padding: 10px 20px;
+    margin-left: 10px;
+    background-color: #4CAF50;
+    border: none;
+    color: white;
+    border-radius: 50px;
+    cursor: pointer;
+    font-size: 16px;
+    max-height: 50px;
+}
+
+.input-area button:hover {
+    background-color: #45a049;
+}
+
+.message {
+    display: flex;
+    flex-direction: column;
+    padding: 10px 15px;
+    border-radius: 20px;
+    max-width: 100%; /* Ensure messages do not exceed container width */
+    word-wrap: break-word; /* Break long words to avoid overflow */
+    box-sizing: border-box; /* Ensure padding is included in width */
+    font-family: 'Roboto', sans-serif;
+    line-height: 1.5;
+}
+
+.message.user {
+    /*background-color: #DCF8C6;*/
+    background-color: #f1f0f0;
+    align-self: flex-end;
+    text-align: left;
+    margin-left: auto;
+}
+
+.message.agent {
+    /*background-color: #f1f0f0;*/
+    align-self: flex-start;
+    text-align: left;
+    margin-right: auto;
+    width: 100% !important;
+    /*padding: 20px;*/
+    padding: 10px 0px 0px 5px !important;
+}
+
+.message-content {
+    width: 100% !important;
+}
+
+.icon-and-content {
+    display: flex;
+    align-items: flex-start;
+    width: 100%; /* Ensure full width */
+}
+
+.chat-bubble-icon {
+    width: 20px; /* Size of the chat bubble icon */
+    height: 20px;
+    margin-right: 6px; /* Space between the icon and message */
+    margin-top: -10px;
+}
+
+.code-block {
+    position: relative;
+    padding: 10px;
+    border-radius: 5px;
+    color: lightgrey;
+    background-color: #100f0f;
+    margin: 0; /* Remove margin to fit full width */
+    overflow-x: auto;
+    width: 100%; /* Ensure the code block takes full width */
+    box-sizing: border-box; /* Ensure padding is included in width */
+}
+
+.copy-button {
+    width: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    position: absolute;
+    top: 5px;
+    right: 10px;
+    background-color: blue;
+    color: white;
+    padding: 0;
+    cursor: pointer;
+    border: none;
+}
+
+.copy-button i {
+    margin: 5px;
+    font-size: 14px;
+    vertical-align: middle;
+}
+
+.copy-button:hover {
+    background-color: #0056b3;
+}
+
+.scroll-to-bottom {
+    position: absolute;
+    bottom: 130px; /* Adjust this as needed */
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: #333;
+    color: #fff;
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+    z-index: 9999;
+}
+
+.scroll-icon {
+    font-size: 25px;
+}
