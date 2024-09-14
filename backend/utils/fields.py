@@ -1,6 +1,6 @@
-import json, random, string, secrets
-import re
+import json, random, string, secrets, re, ast
 from marshmallow import ValidationError
+from typing import Dict, Set, Any, List
 
 
 def convert_properties(fields_to_convert, obj):
@@ -16,6 +16,35 @@ def convert_properties(fields_to_convert, obj):
         return obj
     else:
         return obj
+
+
+def convert_list(fields_to_convert: Set[str], obj: Dict[str, Any]) -> Dict[str, Any]:
+    """
+    Convert specified fields in a dictionary from strings representing lists to actual lists.
+
+    :param fields_to_convert: Set of field names to be converted.
+    :param obj: Dictionary containing fields to be converted.
+    :return: Dictionary with updated fields.
+    """
+
+    for field in fields_to_convert:
+        if field in obj:
+            value = obj[field]
+            if isinstance(value, str):
+                try:
+                    # Use ast.literal_eval for safe evaluation of the string
+                    converted_list = ast.literal_eval(value)
+
+                    # Check if the result is actually a list
+                    if isinstance(converted_list, list):
+                        obj[field] = converted_list
+                    else:
+                        raise ValueError(
+                            f"The field '{field}' does not represent a valid list."
+                        )
+                except (ValueError, SyntaxError) as e:
+                    raise ValueError(f"Error converting field '{field}': {e}")
+    return obj
 
 
 def generate_random_string(length=10):

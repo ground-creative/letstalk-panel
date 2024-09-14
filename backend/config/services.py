@@ -29,8 +29,13 @@ services = {
         },
         "help_assistant": {
             "path": "blueprints.backend.assistants.help_assistant.routes",
-            "blueprint_name": "help_assistant_bp",
+            "blueprint_name": "backend_help_assistant_bp",
             "kwargs": {"url_prefix": f"{EnvConfig.BACKEND_PREFIX}/help-assistant"},
+        },
+        "Knowledge_base": {
+            "path": "blueprints.backend.knowledge_base.routes",
+            "blueprint_name": "backend_knowledge_base_bp",
+            "kwargs": {"url_prefix": f"{EnvConfig.BACKEND_PREFIX}/workspaces"},
         },
     },
     "api": {

@@ -36,3 +36,5 @@ class EnvConfig:
     TWILIO_AUTH_TOKEN = os.getenv("TWILIO_AUTH_TOKEN")
     MONGODB_ADDRESS = os.getenv("MONGODB_ADDRESS", "mongodb://localhost:27017")
     SESSION_MONGODB_DB = os.getenv("SESSION_MONGODB_DB", "letstalk")
+    VECTOR_STORE_PATH = os.getenv("VECTOR_STORE_PATH", "/vector_store")
+    KNOWLEDGE_BASE_PATH = os.getenv("KNOWLEDGE_BASE_PATH", "/knowledge_base")

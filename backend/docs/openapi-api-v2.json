@@ -319,6 +319,90 @@
           "message"
         ]
       },
+      "ModelConfigToolsMessagesResponse": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string"
+          },
+          "content": {
+            "type": "string"
+          }
+        }
+      },
+      "ModelConfigToolsParametersPropertiesResponse": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          }
+        }
+      },
+      "ModelConfigToolsParametersResponse": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string"
+          },
+          "properties": {
+            "type": "object",
+            "additionalProperties": {
+              "$ref": "#/components/schemas/ModelConfigToolsParametersPropertiesResponse"
+            }
+          },
+          "required": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "ModelConfigToolsFunctionResponse": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "parameters": {
+            "$ref": "#/components/schemas/ModelConfigToolsParametersResponse"
+          }
+        }
+      },
+      "ModelConfigToolsServerResponse": {
+        "type": "object",
+        "properties": {
+          "url": {
+            "type": "string"
+          }
+        }
+      },
+      "ModelConfigToolsResponse": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string"
+          },
+          "messages": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ModelConfigToolsMessagesResponse"
+            }
+          },
+          "function": {
+            "$ref": "#/components/schemas/ModelConfigToolsFunctionResponse"
+          },
+          "server": {
+            "$ref": "#/components/schemas/ModelConfigToolsServerResponse"
+          }
+        }
+      },
       "ModelConfigProviderResponse": {
         "type": "object",
         "properties": {
@@ -349,10 +433,17 @@
             "type": "number"
           },
           "knowledge_base": {
-            "type": "string"
+            "type": "array",
+            "default": [],
+            "items": {
+              "type": "string"
+            }
           },
           "tools": {
-            "type": "object"
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ModelConfigToolsResponse"
+            }
           },
           "extra_params": {
             "type": "object"
@@ -412,15 +503,19 @@
             "nullable": true
           },
           "tools": {
-            "type": "object",
-            "default": {},
-            "additionalProperties": {
-              "nullable": true
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": {
+                "nullable": true
+              }
             }
           },
           "knowledge_base": {
-            "type": "string",
-            "default": ""
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
           },
           "extra_params": {
             "type": "object",
@@ -499,16 +594,11 @@
             "default": null,
             "nullable": true
           },
-          "tools": {
-            "type": "object",
-            "default": {},
-            "additionalProperties": {
-              "nullable": true
-            }
-          },
           "knowledge_base": {
-            "type": "string",
-            "default": ""
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
           },
           "extra_params": {
             "type": "object",

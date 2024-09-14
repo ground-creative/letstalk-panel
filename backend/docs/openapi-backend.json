@@ -154,8 +154,10 @@
             "type": "object"
           },
           "knowledge_base": {
-            "default": "",
-            "type": "string"
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
           },
           "max_tokens": {
             "default": null,
@@ -178,13 +180,6 @@
             "minimum": 0.0,
             "nullable": true,
             "type": "number"
-          },
-          "tools": {
-            "additionalProperties": {
-              "nullable": true
-            },
-            "default": {},
-            "type": "object"
           }
         },
         "type": "object"
@@ -231,8 +226,10 @@
             "type": "object"
           },
           "knowledge_base": {
-            "default": "",
-            "type": "string"
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
           },
           "max_tokens": {
             "default": null,
@@ -257,11 +254,13 @@
             "type": "number"
           },
           "tools": {
-            "additionalProperties": {
-              "nullable": true
+            "items": {
+              "additionalProperties": {
+                "nullable": true
+              },
+              "type": "object"
             },
-            "default": {},
-            "type": "object"
+            "type": "array"
           }
         },
         "required": [
@@ -288,7 +287,11 @@
             "type": "object"
           },
           "knowledge_base": {
-            "type": "string"
+            "default": [],
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
           },
           "max_tokens": {
             "type": "number"
@@ -309,7 +312,94 @@
             "type": "number"
           },
           "tools": {
+            "items": {
+              "$ref": "#/components/schemas/ModelConfigToolsResponse"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "ModelConfigToolsFunctionResponse": {
+        "properties": {
+          "description": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "parameters": {
+            "$ref": "#/components/schemas/ModelConfigToolsParametersResponse"
+          }
+        },
+        "type": "object"
+      },
+      "ModelConfigToolsMessagesResponse": {
+        "properties": {
+          "content": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "ModelConfigToolsParametersPropertiesResponse": {
+        "properties": {
+          "description": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "ModelConfigToolsParametersResponse": {
+        "properties": {
+          "properties": {
+            "additionalProperties": {
+              "$ref": "#/components/schemas/ModelConfigToolsParametersPropertiesResponse"
+            },
             "type": "object"
+          },
+          "required": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "type": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "ModelConfigToolsResponse": {
+        "properties": {
+          "function": {
+            "$ref": "#/components/schemas/ModelConfigToolsFunctionResponse"
+          },
+          "messages": {
+            "items": {
+              "$ref": "#/components/schemas/ModelConfigToolsMessagesResponse"
+            },
+            "type": "array"
+          },
+          "server": {
+            "$ref": "#/components/schemas/ModelConfigToolsServerResponse"
+          },
+          "type": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "ModelConfigToolsServerResponse": {
+        "properties": {
+          "url": {
+            "type": "string"
           }
         },
         "type": "object"
@@ -1199,6 +1289,53 @@
         "summary": "Update Chat Assistant",
         "tags": [
           "Chat Assistants"
+        ]
+      }
+    },
+    "/backend/workspaces/{workspaceID}/knowledge-base": {
+      "get": {
+        "parameters": [
+          {
+            "in": "path",
+            "name": "workspaceID",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "code": {
+                      "type": "integer"
+                    },
+                    "data": {},
+                    "message": {
+                      "type": "string"
+                    },
+                    "time": {
+                      "type": "integer"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful response"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Get Knowledge Base Files",
+        "tags": [
+          "Knowledge Base"
         ]
       }
     },
